@@ -1,0 +1,35 @@
+<html>
+  <head><title>Auto Copy: Options</title></head>
+  <script type="text/javascript">
+    function saveOptions() {
+      if (!window.localStorage) {
+        alert("Error local storage is unavailable.");
+        window.close();
+      }
+
+      var el = document.getElementById("chbx");
+      window.localStorage.enableForTextBoxes = el.checked ? true : false;
+
+      window.close();
+    }
+
+    function restoreOptions() {
+      if (!window.localStorage) {
+        alert("Error local storage is unavailable.");
+        window.close();
+      }
+
+      document.getElementById("chbx").checked = 
+        (window.localStorage.enableForTextBoxes === "true") ? true : false;
+    }
+  </script>
+
+  <body onload="restoreOptions()">
+    <h1>Auto Copy Options</h1>
+    <input type="checkbox" id="chbx" /> Enable in text boxes
+    <br>
+    <br>
+    <button onclick="saveOptions()">Save &amp; Close</button>
+  </body>
+</html>
+

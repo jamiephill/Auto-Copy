@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <script>
+      chrome.extension.onRequest.addListener(
+        function (req, sender, callback) {
+          if (window.localStorage != null && window.localStorage[req.name]) {
+            callback({"value" : window.localStorage[req.name]});
+          } else {
+            callback({ "value" : undefined });
+          }
+        }
+      );
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
