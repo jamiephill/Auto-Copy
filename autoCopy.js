@@ -1,4 +1,7 @@
-var opts = {};
+var opts = {
+  'enableForTextBoxes' : false,
+  'mouseDownTarget'    : null
+};
 
 //-----------------------------------------------------------------------------
 // window.localStorage is available, but doesn't appear to be initialized
@@ -12,17 +15,38 @@ chrome.extension.sendRequest(
   }
 );
 
+//-----------------------------------------------------------------------------
+// The mouseup target is the element at the point the mouseup event occurs.
+// It is possible to select text within a text field but have the mouse cursor
+// move outside of the text field which makes it impossible to tell if a text
+// field element was involved in the selection.  In order to work around this
+// the mousedown target is used to determine if a text field is involved.
+//
+// It is only important if the user wants to exclude selections from text 
+// fields
+//
+// The if is always evaluating to false because the message passing hasn't
+// occurred by the time this code segment is executed.  I'm leaving it in
+// as a placeholder in case localStorage gets initialized directly for content 
+// pages.
+//-----------------------------------------------------------------------------
+if (!opts.enableForTextBoxes) {
+  document.body.addEventListener(
+    "mousedown", 
+    function (e) {
+      opts.mouseDownTarget = e.target;
+    },
+    false
+  );
+}
+
 document.body.addEventListener(
   "mouseup", 
   function (e) {
-    if (!e.target.nodeName) {
-      return;
-    }
-  
     if (
       !opts.enableForTextBoxes &&
-      (e.target.nodeName === "INPUT" ||
-      e.target.nodeName === "TEXTAREA") 
+      (opts.mouseDownTarget.nodeName === "INPUT" ||
+      opts.mouseDownTarget.nodeName === "TEXTAREA") 
     ){
       return;
     }
@@ -33,6 +57,7 @@ document.body.addEventListener(
        document.execCommand("copy", false, null);
       }
     } catch (ex) {
+      console.log("Caught exception: "+ex);
     }
   },
   false
