@@ -3,15 +3,29 @@
     <script type="text/javascript">
       chrome.extension.onRequest.addListener(
         function (req, sender, callback) {
-          if (window.localStorage != null && window.localStorage[req.name]) {
-            callback({"value" : window.localStorage[req.name]});
-          } else {
-            callback({ "value" : undefined });
+          var i, len, resp = {};
+          if (req.type === "config") {
+            if (window.localStorage != null && req.keys != null) {
+              len = req.keys.length;
+              for (i=0; i<len; i++) {
+                resp[req.keys[i]] = 
+                  window.localStorage[req.keys[i]] || undefined;
+              }
+              callback(resp);
+            } else {
+              callback({});
+            }
+          } else if (req.type === "reformat") {
+            var ta = document.getElementById('ta');
+            ta.value = req.text;
+            ta.select();
+            document.execCommand("copy", false, null);
           }
         }
       );
     </script>
   </head>
   <body>
+    <textarea id="ta"></textarea>
   </body>
 </html>

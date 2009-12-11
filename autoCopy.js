@@ -1,5 +1,10 @@
 var opts = {
   'enableForTextBoxes' : false,
+  'pasteOnMiddleClick' : false,
+  'copyAsPlainText'    : false,
+  'includeUrl'         : false,
+  'prependUrl'         : false,
+  'includeUrlText'     : "",
   'mouseDownTarget'    : null
 };
 
@@ -9,9 +14,21 @@ var opts = {
 // background page to get the info.
 //-----------------------------------------------------------------------------
 chrome.extension.sendRequest(
-  { "name" : "enableForTextBoxes" }, 
+  { 
+    "type" : "config",
+    "keys" : [
+      "enableForTextBoxes", "copyAsPlainText", "includeUrl", "prependUrl",
+      "includeUrlText"
+    ] 
+  }, 
   function (resp) {
-    opts.enableForTextBoxes = (resp.value === "true") ? true : false;
+    opts.enableForTextBoxes = 
+      (resp.enableForTextBoxes === "true") ? true : false;
+    opts.copyAsPlainText = (resp.copyAsPlainText === "true") ? true : false;
+    opts.includeUrl = (resp.includeUrl === "true") ? true : false;
+    opts.prependUrl = (resp.prependUrl === "true") ? true : false;
+    opts.includeUrlText =
+      (resp.includeUrlText === " ") ? "" : resp.includeUrlText;
   }
 );
 
@@ -43,6 +60,24 @@ if (!opts.enableForTextBoxes) {
 document.body.addEventListener(
   "mouseup", 
   function (e) {
+    var rv, s, el, text;
+
+    //-------------------------------------------------------------------------
+    // Unfortunately Chrome doesn't seem to support execCommand('paste').  
+    // When it is called it always returns false.  I am going to post to the
+    // forums to see if there is some way around it.  So I'll leave this code
+    // in place for now.
+    //-------------------------------------------------------------------------
+    if (opts.pasteOnMiddleClick && e.button === 1) {
+      try {
+        rv = document.execCommand("paste", false, null);
+      } catch (ex) {
+        console.log("Caught exception: "+ex);
+      }
+      return;
+    }
+    //-------------------------------------------------------------------------
+
     if (
       !opts.enableForTextBoxes &&
       (opts.mouseDownTarget.nodeName === "INPUT" ||
@@ -52,13 +87,31 @@ document.body.addEventListener(
     }
   
     try {
-      var s = window.getSelection();
-      if (s.toString().length > 0) {
-       document.execCommand("copy", false, null);
+      s = window.getSelection();
+      if (opts.copyAsPlainText || opts.includeUrl) {
+        text = s.toString();
+        if (opts.includeUrl) {
+          if (opts.prependUrl) {
+            text = opts.includeUrlText + "<" + location.href + ">\n" + text;
+          } else {
+            text += "\n" + opts.includeUrlText + "<" + location.href + ">";
+          }
+        }
+        chrome.extension.sendRequest(
+          {
+            "type" : "reformat",
+            "text" : text,
+          }
+        );
+      } else {
+        if (s.toString().length > 0) {
+          rv = document.execCommand("copy", false, null);
+        }
       }
     } catch (ex) {
       console.log("Caught exception: "+ex);
     }
+    return;
   },
   false
 );

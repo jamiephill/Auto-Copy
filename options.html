@@ -1,32 +1,138 @@
 <html>
-  <head><title>Auto Copy: Options</title></head>
-  <script type="text/javascript">
-    function saveOptions() {
-      if (!window.localStorage) {
-        alert("Error local storage is unavailable.");
+  <head>
+    <title>Auto Copy: Options</title>
+    <script type="text/javascript">
+      function saveOptions() {
+        if (!window.localStorage) {
+          alert("Error local storage is unavailable.");
+          window.close();
+        }
+  
+        window.localStorage.enableForTextBoxes = 
+          document.getElementById("eitb").checked ? true : false;
+        //window.localStorage.pasteOnMiddleClick = 
+        //  document.getElementById("pomc").checked ? true : false;
+        window.localStorage.copyAsPlainText = 
+          document.getElementById("capt").checked ? true : false;
+        window.localStorage.includeUrl = 
+          document.getElementById("iurl").checked ? true : false;
+        window.localStorage.prependUrl = 
+          document.getElementById("iurlp").checked ? true : false;
+        //---------------------------------------------------------------------
+        // Setting a localStorage var to empty causes it to get set to 
+        // undefined so there is no way to tell if a user has set an empty
+        // string.  Therefore, a placeholder is needed, so a single space is
+        // used.
+        //---------------------------------------------------------------------
+        var text = document.getElementById("iurltext").value;
+        window.localStorage.includeUrlText = 
+          (text.length <= 0 || text === " ") ? " " : text + " ";
+        //---------------------------------------------------------------------
+  
         window.close();
       }
+  
+      function restoreOptions() {
+        if (!window.localStorage) {
+          alert("Error local storage is unavailable.");
+          window.close();
+        }
+  
+        document.getElementById("eitb").checked = 
+          (window.localStorage.enableForTextBoxes === "true") ? true : false;
+        //document.getElementById("pomc").checked = 
+        //  (window.localStorage.pasteOnMiddleClick === "true") ? true : false;
+        document.getElementById("capt").checked = 
+          (window.localStorage.copyAsPlainText === "true") ? true : false;
+        document.getElementById("iurl").checked = 
+          (window.localStorage.includeUrl === "true") ? true : false;
+        document.getElementById("iurltext").value = 
+          window.localStorage.includeUrlText || "Copied from";
 
-      var el = document.getElementById("chbx");
-      window.localStorage.enableForTextBoxes = el.checked ? true : false;
+        var v = window.localStorage.prependUrl;
+        if (v === undefined || v === "false") {
+          document.getElementById("iurlp").checked = false;
+          document.getElementById("iurla").checked = true;
+        } else {
+          document.getElementById("iurlp").checked = true;
+          document.getElementById("iurla").checked = false;
+        }
 
-      window.close();
-    }
+        if (
+          window.localStorage.includeUrl &&
+          window.localStorage.includeUrl === "true"
+        ) {
+          toggleDiv("diviurlap");
+        }
+      }
+  
+      function toggleCapt() {
+        var capt = document.getElementById('capt');
+        var iurl = document.getElementById('iurl').checked;
 
-    function restoreOptions() {
-      if (!window.localStorage) {
-        alert("Error local storage is unavailable.");
-        window.close();
+        if (iurl) {
+          capt.checked = true;
+        } else {
+          capt.checked = 
+            (window.localStorage.copyAsPlainText === "true") ? true : false;
+        }
       }
 
-      document.getElementById("chbx").checked = 
-        (window.localStorage.enableForTextBoxes === "true") ? true : false;
-    }
-  </script>
+      function fixUpIncludeUrl() {
+        var capt    = document.getElementById('capt').checked;
+        var iurl    = document.getElementById('iurl');
+        var iurldiv = document.getElementById('diviurlap');
+
+        if (capt) {
+          iurl.checked = 
+            (window.localStorage.includeUrl === "true") ? true : false;
+          if (iurl.checked) {
+            iurldiv.style.display = 'block';
+          }
+        } else {
+          iurl.checked = false;
+          iurldiv.style.display = 'none';
+        }
+      }
+
+      function toggleDiv(id) {
+        var el = document.getElementById(id);
+  
+        if (!el) {
+          return
+        }
+  
+        el.style.display = (el.style.display === "block") ? "none" : "block";
+      }
+    </script>
+    <style>
+      div#diviurlap {
+        display: none;
+        margin-left: 20px;
+        margin-bottom: -20px;
+      }
+      .note {
+      }
+    </style>
+  </head>
 
   <body onload="restoreOptions()">
     <h1>Auto Copy Options</h1>
-    <input type="checkbox" id="chbx" /> Enable in text boxes
+    <input type="checkbox" id="eitb"> Enable in text boxes
+    <br>
+    <!--
+    <input type="checkbox" id="pomc"> Paste on middle click
+    <br>
+    -->
+    <input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text
+    <br>
+    <input type="checkbox" id="iurl" onclick="toggleDiv('diviurlap'); toggleCapt();"> Include URL <span class="note">(Note: this option requries copy as plain text)</span>
+    <div id="diviurlap">
+      <input type="radio" name="iurlap" id="iurlp"> Prepend URL
+      <input type="radio" name="iurlap" id="iurla" checked="checked"> Append URL
+      <br>
+      Prepend text to URL: <input type="text" id="iurltext" value="Copied from" onclick="this.select();">
+    </div>
     <br>
     <br>
     <button onclick="saveOptions()">Save &amp; Close</button>
