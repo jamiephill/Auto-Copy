@@ -16,10 +16,12 @@
               callback({});
             }
           } else if (req.type === "reformat") {
-            var ta = document.getElementById('ta');
-            ta.value = req.text;
-            ta.select();
-            document.execCommand("copy", false, null);
+            if (req.text.length > 0) {
+              var ta = document.getElementById('ta');
+              ta.value = req.text;
+              ta.select();
+              document.execCommand("copy", false, null);
+            }
           }
         }
       );
