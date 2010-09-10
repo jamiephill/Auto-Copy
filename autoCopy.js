@@ -86,6 +86,14 @@ document.body.addEventListener(
       return;
     }
   
+    //-------------------------------------------------------------------------
+    // I'm having to force this setting as of Chrome 6 because for some reason
+    // execCommand("copy") is not working on a selection in the page, but will
+    // work on a selection of text in a textarea.
+    //-------------------------------------------------------------------------
+    opts.copyAsPlainText = true;
+    //-------------------------------------------------------------------------
+
     try {
       s = window.getSelection();
       if (opts.copyAsPlainText || opts.includeUrl) {

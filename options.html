@@ -12,8 +12,13 @@
           document.getElementById("eitb").checked ? true : false;
         //window.localStorage.pasteOnMiddleClick = 
         //  document.getElementById("pomc").checked ? true : false;
-        window.localStorage.copyAsPlainText = 
-          document.getElementById("capt").checked ? true : false;
+        //---------------------------------------------------------------------
+        // Working around an issue in Chrome 6
+        //---------------------------------------------------------------------
+        //window.localStorage.copyAsPlainText = 
+        //  document.getElementById("capt").checked ? true : false;
+        window.localStorage.copyAsPlainText = true;
+        //---------------------------------------------------------------------
         window.localStorage.includeUrl = 
           document.getElementById("iurl").checked ? true : false;
         window.localStorage.prependUrl = 
@@ -42,8 +47,13 @@
           (window.localStorage.enableForTextBoxes === "true") ? true : false;
         //document.getElementById("pomc").checked = 
         //  (window.localStorage.pasteOnMiddleClick === "true") ? true : false;
-        document.getElementById("capt").checked = 
-          (window.localStorage.copyAsPlainText === "true") ? true : false;
+        //---------------------------------------------------------------------
+        // Working around an issue in Chrome 6
+        //---------------------------------------------------------------------
+        //document.getElementById("capt").checked = 
+        //  (window.localStorage.copyAsPlainText === "true") ? true : false;
+        document.getElementById("capt").checked = true;
+        //---------------------------------------------------------------------
         document.getElementById("iurl").checked = 
           (window.localStorage.includeUrl === "true") ? true : false;
         document.getElementById("iurltext").value = 
@@ -69,6 +79,13 @@
       function toggleCapt() {
         var capt = document.getElementById('capt');
         var iurl = document.getElementById('iurl').checked;
+
+        //---------------------------------------------------------------------
+        // Working around an issue in Chrome 6
+        //---------------------------------------------------------------------
+        capt.checked = true;
+        return;
+        //---------------------------------------------------------------------
 
         if (iurl) {
           capt.checked = true;
@@ -124,7 +141,8 @@
     <input type="checkbox" id="pomc"> Paste on middle click
     <br>
     -->
-    <input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text
+    <!--<input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text-->
+    <input type="checkbox" checked="checked" disabled="disabled" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text (Due to an issue in Chrome 6 this option must be enabled)
     <br>
     <input type="checkbox" id="iurl" onclick="toggleDiv('diviurlap'); toggleCapt();"> Include URL <span class="note">(Note: this option requries copy as plain text)</span>
     <div id="diviurlap">

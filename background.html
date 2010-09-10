@@ -20,7 +20,7 @@
               var ta = document.getElementById('ta');
               ta.value = req.text;
               ta.select();
-              document.execCommand("copy", false, null);
+              var rv = document.execCommand("copy", false, null);
             }
           }
         }

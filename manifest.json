@@ -1,7 +1,7 @@
 {
   "name"            : "Auto Copy",
   "description"     : "Automatically copy selected text to the clipboard. Has options for copying as plain text; including the URL in the copied text; etc.",
-  "version"         : "1.0.4",
+  "version"         : "1.0.5",
   "icons"           : {
     "16"  : "autoCopy-16.png",
     "32"  : "autoCopy-32.png",
