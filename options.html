@@ -1,6 +1,9 @@
 <html>
   <head>
     <title>Auto Copy: Options</title>
+
+    <script type="text/javascript" src="date.js"></script>
+
     <script type="text/javascript">
       function saveOptions() {
         if (!window.localStorage) {
@@ -10,8 +13,8 @@
   
         window.localStorage.enableForTextBoxes = 
           document.getElementById("eitb").checked ? true : false;
-        //window.localStorage.pasteOnMiddleClick = 
-        //  document.getElementById("pomc").checked ? true : false;
+        window.localStorage.pasteOnMiddleClick = 
+          document.getElementById("pomc").checked ? true : false;
         //---------------------------------------------------------------------
         // Working around an issue in Chrome 6
         //---------------------------------------------------------------------
@@ -31,7 +34,8 @@
         //---------------------------------------------------------------------
         var text = document.getElementById("iurltext").value;
         window.localStorage.includeUrlText = 
-          (text.length <= 0 || text === " ") ? " " : text + " ";
+          (text.length <= 0 || text === " ") ? " " : text;
+          //(text.length <= 0 || text === " ") ? " " : text + " ";
         //---------------------------------------------------------------------
   
         window.close();
@@ -45,8 +49,8 @@
   
         document.getElementById("eitb").checked = 
           (window.localStorage.enableForTextBoxes === "true") ? true : false;
-        //document.getElementById("pomc").checked = 
-        //  (window.localStorage.pasteOnMiddleClick === "true") ? true : false;
+        document.getElementById("pomc").checked = 
+          (window.localStorage.pasteOnMiddleClick === "true") ? true : false;
         //---------------------------------------------------------------------
         // Working around an issue in Chrome 6
         //---------------------------------------------------------------------
@@ -57,7 +61,7 @@
         document.getElementById("iurl").checked = 
           (window.localStorage.includeUrl === "true") ? true : false;
         document.getElementById("iurltext").value = 
-          window.localStorage.includeUrlText || "Copied from";
+          window.localStorage.includeUrlText || "$crlfCopied from: $title - <$url>";
 
         var v = window.localStorage.prependUrl;
         if (v === undefined || v === "false") {
@@ -125,35 +129,101 @@
     <style>
       div#diviurlap {
         display: none;
+      }
+      .note {
+        font-size: smaller;
+        color: #426DC9;
+        text-shadow: #fff 0 1px 1px;
+      }
+      .larger {
+        font-size: 1.1em;
+      }
+      .indent {
         margin-left: 20px;
         margin-bottom: -20px;
       }
-      .note {
+      h1 {
+        -webkit-border-radius: 8px;
+        -webkit-box-shadow: 0px 1px 0px #f7f7f7;
+        -webkit-box-shadow: 0 0 20px #d0d0d0;
+        background: -webkit-linear-gradient(left, #BBCEE9, #BBCEE9 50%, #AABEDC);
+        border-bottom: 1px solid #8faad9;
+        border-top: 1px solid #8faad9;
+        text-shadow: #bbcee9 0 1px 1px;
+        padding: 20px;
+        font-size: 3em;
+        color: #000;
+        text-shadow: #bbcee9 0 1px 1px;
+        margin: 20px;
+      }
+      .options {
+        -webkit-border-radius: 8px;
+        -webkit-border-end: 1px solid #c6c9ce;
+        -webkit-box-shadow: 0 0 20px #d0d0d0;
+        background: -webkit-linear-gradient(rgba(234, 238, 243, 0.2), #eaeef3),
+                    -webkit-linear-gradient(left, #eaeef3, #eaeef3 50%, #d3d7db);
+        padding: 20px;
+        margin: 20px;
+        font-size: 1.1em;
+        line-height: 1.6em;
+        color: #000;
+        text-shadow: #fff 0 1px 1px;
+      }
+      #logo {
+        float: left;
+        padding-right: 20px;
+      }
+      button {
+        margin-top: 12px;
+        padding: 6px;
       }
     </style>
   </head>
 
   <body onload="restoreOptions()">
-    <h1>Auto Copy Options</h1>
+    <h1>
+      <img id="logo" src="autoCopy-64.png" width="64" height="64" alt="logo">
+      Auto Copy - Options
+    </h1>
+  <div class="options">
     <input type="checkbox" id="eitb"> Enable in text boxes
     <br>
-    <!--
+    <!---->
     <input type="checkbox" id="pomc"> Paste on middle click
     <br>
+    <!---->
+    <!-- Working around an issue in Chrome 6 -->
+    <!--
+    <input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy without formatting
     -->
-    <!--<input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text-->
-    <input type="checkbox" checked="checked" disabled="disabled" id="capt" onclick="fixUpIncludeUrl();"> Copy as plain text (Due to an issue in Chrome 6 this option must be enabled)
+    <input type="checkbox" disabled="disabled" checked="checked" id="capt" onclick="fixUpIncludeUrl();"> Copy without formatting <span class="note">(Note: Due to a change in Chrome permissions since version 6 this option must be enabled.)</span>
+
     <br>
-    <input type="checkbox" id="iurl" onclick="toggleDiv('diviurlap'); toggleCapt();"> Include URL <span class="note">(Note: this option requries copy as plain text)</span>
-    <div id="diviurlap">
-      <input type="radio" name="iurlap" id="iurlp"> Prepend URL
-      <input type="radio" name="iurlap" id="iurla" checked="checked"> Append URL
+    <input type="checkbox" id="iurl" onclick="toggleDiv('diviurlap'); toggleCapt();"> Include an informational comment <span class="note">(Note: this option requires copy without formatting.)</span>
+    <div id="diviurlap" class="indent">
+      <input type="radio" name="iurlap" id="iurlp"> Add the comment to the beginning of the copied text
       <br>
-      Prepend text to URL: <input type="text" id="iurltext" value="Copied from" onclick="this.select();">
+      <input type="radio" name="iurlap" id="iurla" checked="checked"> Add the comment to the end of the copied text
+      <br>
+      Format: <input type="text" size="64" id="iurltext" value="$crlfCopied from: $title - <$url>" onclick="this.select();"> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
+      <div class="indent note larger">
+        The comment can contain the following variables:
+        <br>
+        <div class="indent">
+          <b>$title</b> - Document title 
+          <div class="indent">Example: <b>stratus nine: auto copy</b></div>
+          <br>
+          <b>$url</b> - Document URL
+          <div class="indent">Example: <b>http://www.stratusnine.com/trac/Auto-Copy/</b></div>
+          <br>
+          <b>$crlf</b> - Inserts a blank line
+        </div>
+      </div>
+
     </div>
     <br>
-    <br>
     <button onclick="saveOptions()">Save &amp; Close</button>
+  </div>
   </body>
 </html>
 

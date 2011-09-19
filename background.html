@@ -20,8 +20,14 @@
               var ta = document.getElementById('ta');
               ta.value = req.text;
               ta.select();
-              var rv = document.execCommand("copy", false, null);
+              var rv = document.execCommand("copy");
             }
+          } else if (req.type === "paste") {
+              var ta = document.getElementById('ta');
+              ta.value = "";
+              ta.select();
+              var rv = document.execCommand("paste");
+              callback(ta.value);
           }
         }
       );

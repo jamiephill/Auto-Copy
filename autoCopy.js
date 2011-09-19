@@ -17,13 +17,15 @@ chrome.extension.sendRequest(
   { 
     "type" : "config",
     "keys" : [
-      "enableForTextBoxes", "copyAsPlainText", "includeUrl", "prependUrl",
-      "includeUrlText"
+      "enableForTextBoxes", "pasteOnMiddleClick", "copyAsPlainText", 
+      "includeUrl", "prependUrl", "includeUrlText"
     ] 
   }, 
   function (resp) {
     opts.enableForTextBoxes = 
       (resp.enableForTextBoxes === "true") ? true : false;
+    opts.pasteOnMiddleClick = 
+      (resp.pasteOnMiddleClick === "true") ? true : false;
     opts.copyAsPlainText = (resp.copyAsPlainText === "true") ? true : false;
     opts.includeUrl = (resp.includeUrl === "true") ? true : false;
     opts.prependUrl = (resp.prependUrl === "true") ? true : false;
@@ -62,15 +64,32 @@ document.body.addEventListener(
   function (e) {
     var rv, s, el, text;
 
-    //-------------------------------------------------------------------------
-    // Unfortunately Chrome doesn't seem to support execCommand('paste').  
-    // When it is called it always returns false.  I am going to post to the
-    // forums to see if there is some way around it.  So I'll leave this code
-    // in place for now.
-    //-------------------------------------------------------------------------
     if (opts.pasteOnMiddleClick && e.button === 1) {
       try {
-        rv = document.execCommand("paste", false, null);
+        chrome.extension.sendRequest(
+          {
+            "type" : "paste",
+            "text" : text,
+          },
+          function(text) {
+            var el = e.target;
+            var p1, p2;
+
+            if (
+              e.target.nodeName === "INPUT" || 
+              e.target.nodeName === "TEXTAREA"
+            ) {
+              p1 = el.value.substring(0,el.selectionStart);
+              p2 = el.value.substring(el.selectionEnd);
+
+              el.value = p1 + text + p2;
+            } else {
+              console.log(
+                e.target.nodeName+" is not a valid element to paste into"
+              );
+            }
+          }
+        );
       } catch (ex) {
         console.log("Caught exception: "+ex);
       }
@@ -87,24 +106,49 @@ document.body.addEventListener(
     }
   
     //-------------------------------------------------------------------------
-    // I'm having to force this setting as of Chrome 6 because for some reason
-    // execCommand("copy") is not working on a selection in the page, but will
-    // work on a selection of text in a textarea.
+    // I'm having to force this setting as of Chrome 6 because of a change in
+    // Chrome 6 (actually in webkit) that disables execCommand.  It still 
+    // works in background pages which means the copy as plain text option 
+    // still works.
     //-------------------------------------------------------------------------
-    opts.copyAsPlainText = true;
+    //opts.copyAsPlainText = true;
     //-------------------------------------------------------------------------
 
+    var comment;
     try {
       s = window.getSelection();
+      text = s.toString();
+
+      //-----------------------------------------------------------------------
+      // Don't execute the copy if nothing is selected.
+      //-----------------------------------------------------------------------
+      if (text.length <= 0) {
+        return;
+      }
+
       if (opts.copyAsPlainText || opts.includeUrl) {
-        text = s.toString();
-        if (opts.includeUrl) {
+        if (opts.includeUrl && opts.includeUrlText) {
+          comment = opts.includeUrlText;
+
+          if (opts.includeUrlText.indexOf('$title') >= 0) {
+            comment = comment.replace(/\$title/g, document.title);
+          }
+
+          if (opts.includeUrlText.indexOf('$url') >= 0) {
+            comment = comment.replace(/\$url/g, document.URL);
+          }
+
+          if (opts.includeUrlText.indexOf('$crlf') >= 0) {
+            comment = comment.replace(/\$crlf/g, "\n");
+          }
+
           if (opts.prependUrl) {
-            text = opts.includeUrlText + "<" + location.href + ">\n" + text;
+            text = comment + "\n" + text;
           } else {
-            text += "\n" + opts.includeUrlText + "<" + location.href + ">";
+            text += "\n" + comment;
           }
         }
+
         chrome.extension.sendRequest(
           {
             "type" : "reformat",
@@ -112,9 +156,7 @@ document.body.addEventListener(
           }
         );
       } else {
-        if (s.toString().length > 0) {
-          rv = document.execCommand("copy", false, null);
-        }
+        rv = document.execCommand("copy");
       }
     } catch (ex) {
       console.log("Caught exception: "+ex);

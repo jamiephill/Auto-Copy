@@ -1,14 +1,21 @@
 {
   "name"            : "Auto Copy",
   "description"     : "Automatically copy selected text to the clipboard. Has options for copying as plain text; including the URL in the copied text; etc.",
-  "version"         : "1.0.6",
+  "version"         : "2.0.0",
   "icons"           : {
     "16"  : "autoCopy-16.png",
+    "32"  : "autoCopy-32.png",
     "48"  : "autoCopy-48.png",
+    "64"  : "autoCopy-64.png",
     "128" : "autoCopy-128.png"
   },
+  "minimum_chrome_version" : "13",
   "options_page"    : "options.html",
   "background_page" : "background.html",
+  "permissions"     : [
+    "clipboardRead",
+    "clipboardWrite"
+  ],
   "content_scripts" : [{
     "matches"    : ["http://*/*", "https://*/*"],
     "css"        : [],
