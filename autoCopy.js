@@ -1,11 +1,13 @@
 var opts = {
-  'enableForTextBoxes' : false,
-  'pasteOnMiddleClick' : false,
-  'copyAsPlainText'    : false,
-  'includeUrl'         : false,
-  'prependUrl'         : false,
-  'includeUrlText'     : "",
-  'mouseDownTarget'    : null
+  'enableForTextBoxes'            : false,
+  'pasteOnMiddleClick'            : false,
+  'copyAsPlainText'               : false,
+  'includeUrl'                    : false,
+  'prependUrl'                    : false,
+  'includeUrlText'                : "",
+  'includeUrlCommentCountEnabled' : false,
+  'includeUrlCommentCount'        : 5,
+  'mouseDownTarget'               : null
 };
 
 //-----------------------------------------------------------------------------
@@ -18,7 +20,8 @@ chrome.extension.sendRequest(
     "type" : "config",
     "keys" : [
       "enableForTextBoxes", "pasteOnMiddleClick", "copyAsPlainText", 
-      "includeUrl", "prependUrl", "includeUrlText"
+      "includeUrl", "prependUrl", "includeUrlText", 
+      "includeUrlCommentCountEnabled", "includeUrlCommentCount"
     ] 
   }, 
   function (resp) {
@@ -29,6 +32,10 @@ chrome.extension.sendRequest(
     opts.copyAsPlainText = (resp.copyAsPlainText === "true") ? true : false;
     opts.includeUrl = (resp.includeUrl === "true") ? true : false;
     opts.prependUrl = (resp.prependUrl === "true") ? true : false;
+    opts.includeUrlCommentCountEnabled = 
+      (resp.includeUrlCommentCountEnabled === "true") ? true : false;
+    opts.includeUrlCommentCount =
+      (isNaN(resp.includeUrlCommentCount)) ? 5 : resp.includeUrlCommentCount;
     opts.includeUrlText =
       (resp.includeUrlText === " ") ? "" : resp.includeUrlText;
   }
@@ -114,11 +121,11 @@ document.body.addEventListener(
     //opts.copyAsPlainText = true;
     //-------------------------------------------------------------------------
 
-    var comment;
+    var comment, count=0, flag=true;
     try {
       s = window.getSelection();
       text = s.toString();
-
+      
       //-----------------------------------------------------------------------
       // Don't execute the copy if nothing is selected.
       //-----------------------------------------------------------------------
@@ -127,7 +134,16 @@ document.body.addEventListener(
       }
 
       if (opts.copyAsPlainText || opts.includeUrl) {
-        if (opts.includeUrl && opts.includeUrlText) {
+        count = (text.split(/\s+/)).length;
+
+        if (
+          opts.includeUrlCommentCountEnabled &&
+          count <= opts.includeUrlCommentCount
+        ) {
+          flag = false;
+        } 
+
+        if (opts.includeUrl && opts.includeUrlText && flag) {
           comment = opts.includeUrlText;
 
           if (opts.includeUrlText.indexOf('$title') >= 0) {

@@ -37,6 +37,10 @@
           (text.length <= 0 || text === " ") ? " " : text;
           //(text.length <= 0 || text === " ") ? " " : text + " ";
         //---------------------------------------------------------------------
+        window.localStorage.includeUrlCommentCountEnabled = 
+          document.getElementById("iurlewc").checked ? true : false;
+        window.localStorage.includeUrlCommentCount = 
+          parseInt(document.getElementById("iurlcount").value,10);
   
         window.close();
       }
@@ -61,7 +65,13 @@
         document.getElementById("iurl").checked = 
           (window.localStorage.includeUrl === "true") ? true : false;
         document.getElementById("iurltext").value = 
-          window.localStorage.includeUrlText || "$crlfCopied from: $title - <$url>";
+          window.localStorage.includeUrlText || 
+            "$crlfCopied from: $title - <$url>";
+        document.getElementById("iurlewc").checked = 
+          (window.localStorage.includeUrlCommentCountEnabled === "true") ? 
+            true : false;
+        document.getElementById("iurlcount").value = 
+          window.localStorage.includeUrlCommentCount || 5;
 
         var v = window.localStorage.prependUrl;
         if (v === undefined || v === "false") {
@@ -77,6 +87,26 @@
           window.localStorage.includeUrl === "true"
         ) {
           toggleDiv("diviurlap");
+        }
+      }
+
+      function validateCountValue() {
+        var enabled = document.getElementById('iurlewc');
+        var count   = parseInt(document.getElementById('iurlcount').value,10);
+        var saveBtn = document.getElementById('saveButton');
+        var text    = document.getElementById('commentCount');
+
+        if (enabled.checked) {
+          if (count < 1 || count > 99 || isNaN(count)) {
+            saveBtn.disabled = true;
+            text.className = "error";
+          } else {
+            saveBtn.disabled = false;
+            text.className = "";
+          }
+        } else {
+          saveBtn.disabled = false;
+          text.className = "";
         }
       }
   
@@ -129,6 +159,9 @@
     <style>
       div#diviurlap {
         display: none;
+      }
+      .error {
+        color: #FF0000;
       }
       .note {
         font-size: smaller;
@@ -201,6 +234,8 @@
     <br>
     <input type="checkbox" id="iurl" onclick="toggleDiv('diviurlap'); toggleCapt();"> Include an informational comment <span class="note">(Note: this option requires copy without formatting.)</span>
     <div id="diviurlap" class="indent">
+      <input type="checkbox" name="iurlewc" id="iurlewc" onclick="validateCountValue();"> <span id="commentCount" >Only include the comment if more than <input title="Valid values are 1 to 99" type="text" maxlength="2" size="1" id="iurlcount" value="5" onclick="this.select();" onblur="validateCountValue();" onkeyup="validateCountValue();"> words are selected</span>
+      <br>
       <input type="radio" name="iurlap" id="iurlp"> Add the comment to the beginning of the copied text
       <br>
       <input type="radio" name="iurlap" id="iurla" checked="checked"> Add the comment to the end of the copied text
@@ -222,7 +257,7 @@
 
     </div>
     <br>
-    <button onclick="saveOptions()">Save &amp; Close</button>
+    <button id="saveButton" onclick="saveOptions()">Save &amp; Close</button>
   </div>
   </body>
 </html>
