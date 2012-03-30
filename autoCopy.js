@@ -1,7 +1,7 @@
 var opts = {
   'enableForTextBoxes'            : false,
   'pasteOnMiddleClick'            : false,
-  'copyAsPlainText'               : false,
+  'copyAsPlainText'               : true,
   'includeUrl'                    : false,
   'prependUrl'                    : false,
   'includeUrlText'                : "",
@@ -118,7 +118,7 @@ document.body.addEventListener(
     // works in background pages which means the copy as plain text option 
     // still works.
     //-------------------------------------------------------------------------
-    //opts.copyAsPlainText = true;
+    opts.copyAsPlainText = true;
     //-------------------------------------------------------------------------
 
     var comment, count=0, flag=true;
