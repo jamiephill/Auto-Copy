@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <title>Auto Copy: Options</title>
+
+    <!--<script src="/js/jquery.tools.min.js"></script>-->
+    <script type="text/javascript" src="/js/options.js"></script>
+
+    <link rel="stylesheet" href="/css/options.css" type="text/css">
+  </head>
+
+  <body>
+    <h1>
+      <img id="logo" src="/assets/autoCopy-64.png" width="64" height="64" alt="logo">
+      Auto Copy - Options
+    </h1>
+    <!--http://www.mdawson.net/csstips/purecsstabs.php-->
+    <div class="tabGroup">
+      <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
+      <label for="rad1">Settings</label>
+      <input type="radio" name="tabGroup1" id="rad2" class="tab2">
+      <label for="rad2">Blacklist</label>
+      <input type="radio" name="tabGroup1" id="rad3" class="tab3">
+      <label for="rad3">About</label>
+
+      <br>
+
+      <div class="tab tab1">
+        <input class="autosave" type="checkbox" id="eitb"> Enable in text boxes
+        <br>
+        <!---->
+        <input class="autosave" type="checkbox" id="pomc"> Paste on middle click
+        <br>
+        <!---->
+        <!-- Working around an issue in Chrome 6 -->
+        <!--
+        <input type="checkbox" id="capt" onclick="fixUpIncludeUrl();"> Copy without formatting
+        -->
+        <input class="autosave" type="checkbox" disabled="disabled" checked="checked" id="capt"> Copy without formatting <span class="note">(Note: Due to a change in Chrome permissions since version 6 this option must be enabled.)</span>
+    
+        <br>
+        <input class="autosave" type="checkbox" id="iurl"> Include an informational comment <span class="note">(Note: this option requires copy without formatting.)</span>
+        <div id="diviurlap" class="indent">
+          <input class="autosave" type="checkbox" name="iurlewc" id="iurlewc"> <span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="text" maxlength="2" size="1" id="iurlcount" value="5"> words are selected</span>
+          <br>
+          <input class="autosave" type="radio" name="iurlap" id="iurlp"> Add the comment to the beginning of the copied text
+          <br>
+          <input class="autosave" type="radio" name="iurlap" id="iurla" checked="checked"> Add the comment to the end of the copied text
+          <br>
+          Format: <input class="autosave" type="text" size="64" id="iurltext" value="$crlfCopied from: $title - <$url>"> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
+          <div class="indent note larger">
+            The comment can contain the following variables:
+            <br>
+            <div class="indent">
+              <b>$title</b> - Document title 
+              <div class="indent">Example: <b>stratus nine: auto copy</b></div>
+              <br>
+              <b>$url</b> - Document URL
+              <div class="indent">Example: <b>http://stratusnine.com/software/auto-copy/</b></div>
+              <br>
+              <b>$crlf</b> - Inserts a blank line
+            </div>
+          </div>
+    
+        </div>
+        <br>
+        <!--
+        <button id="saveButton">Save &amp; Close</button>
+        -->
+      </div>
+      <div class="tab tab2">
+        <!--
+        <select id="blsel" multiple="multiple" size="5">
+          <option value="docs.google.com">docs.google.com</option>
+        </select>
+        -->
+        <div id="blacklist">
+          <div class="row alt">docs.google.com</div>
+          <div class="row">stratusnine0.com</div>
+          <div class="row alt">stratusnine1.com</div>
+          <div class="row">stratusnine2.com</div>
+          <div class="row alt">stratusnine3.com</div>
+          <div class="row">stratusnine4.com</div>
+          <div class="row alt">stratusnine5.com</div>
+          <div class="row">stratusnine6.com</div>
+          <div class="row alt">stratusnine7.com</div>
+          <div class="row alt">stratusnine8.com</div>
+        </div>
+        <div>
+          Some sites have issues with Auto Copy like Google Docs.  This allows you to define a list of sites that Auto Copy will be disabled on.
+        </div>
+        <div class="clear">
+          <button id="addBtn">Add New Entry</button>
+          <button id="removeBtn">Remove Selected Entries</button>
+        </div>
+      </div>
+      <div class="tab tab3">
+        About
+      </div>
+    </div>
+  </body>
+</html>
+

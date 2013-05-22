@@ -1,0 +1,197 @@
+body {
+  margin: 40px;
+}
+
+div#diviurlap {
+  display: none;
+}
+
+.error {
+  color: #FF0000;
+}
+
+.note {
+  font-size: smaller;
+  color: #426DC9;
+  text-shadow: #fff 0 1px 1px;
+}
+
+.larger {
+  font-size: 1.1em;
+}
+
+.indent {
+  margin-left: 20px;
+  margin-bottom: -20px;
+}
+
+h1 {
+  -webkit-border-radius: 8px;
+  -webkit-box-shadow: 0px 1px 0px #f7f7f7;
+  -webkit-box-shadow: 0 0 20px #d0d0d0;
+  /*background: -webkit-linear-gradient(top, #C0C8D2, #C0C8D2 50%, #CDD4E0);*/
+  background: -webkit-linear-gradient(left, #BBCEE9, #BBCEE9 50%, #AABEDC);
+  border-bottom: 1px solid #8faad9;
+  border-top: 1px solid #8faad9;
+  text-shadow: #bbcee9 0 1px 1px;
+  padding: 20px;
+  font-size: 3em;
+  color: #000;
+  text-shadow: #bbcee9 0 1px 1px;
+  /*margin: 20px;*/
+}
+
+.tab {
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  background: -webkit-linear-gradient(top, #FFF, #FFF 0%, #E8E8E8);
+  /*
+  -webkit-border-radius: 8px;
+  -webkit-border-end: 1px solid #c6c9ce;
+  -webkit-box-shadow: 0 0 20px #d0d0d0;
+  background: -webkit-linear-gradient(rgba(234, 238, 243, 0.2), #eaeef3),
+              -webkit-linear-gradient(left, #eaeef3, #eaeef3 50%, #d3d7db);
+  */
+  /*
+  padding: 20px;
+  margin: 20px;
+  font-size: 1.1em;
+  */
+  line-height: 1.6em;
+  /*
+  color: #000;
+  text-shadow: #fff 0 1px 1px;
+  */
+}
+
+#logo {
+  float: left;
+  padding-right: 20px;
+}
+
+button {
+  margin-top: 12px;
+  padding: 6px;
+}
+
+/* Blacklist */
+div#blacklist {
+  float: left;
+  /*position: absolute;*/
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px inset #C6C9CE;
+  margin: 3px 3px 3px 0;
+  overflow: auto;
+  width: 274px;
+  height: 260px;
+}
+
+div#blacklist div.row {
+  cursor: pointer;
+  border-bottom: 1px solid #C6C9CE;
+  padding: 0 4px;
+}
+
+div#blacklist div.row:last-of-type {
+  border: none;
+}
+
+div#blacklist div.alt {
+  background-color: #EAEAEA;
+}
+
+div#blacklist .selected {
+  background-color: #e9f3f5 !important;
+}
+
+div.clear {
+  clear: both;
+}
+
+/* Tabs */
+
+/* Set the size and font of the tab widget */
+.tabGroup {
+  /*font: 10pt arial, verdana;*/
+  /*width: 800px;*/
+  /*height: 400px;*/
+}
+ 
+/* Configure the radio buttons to hide off screen */
+.tabGroup > input[type="radio"] {
+  position: absolute;
+  left:-100px;
+  top:-100px;
+}
+ 
+/* Configure labels to look like tabs */
+.tabGroup > input[type="radio"] + label {
+  /* inline-block such that the label can be given dimensions */
+  display: inline-block;
+ 
+  /* A nice curved border around the tab */
+  border: 1px solid #c6c9ce;
+  border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  -webkit-border-radius: 5px 5px 0 0;
+   
+  /* the bottom border is handled by the tab content div */
+  border-bottom: 0;
+ 
+  /* Padding around tab text */
+  padding: 5px 10px;
+ 
+  /* Set the background color to default gray (non-selected tab) */
+  /*background-color:#ddd;*/
+  background: -webkit-linear-gradient(top, #FFF, #FFF 0%, #DDD);
+}
+ 
+/* Focused tabs need to be highlighted as such */
+.tabGroup > input[type="radio"]:focus + label {
+  border:1px dashed #c6c9ce;
+}
+ 
+/* Checked tabs must be white with the bottom border removed */
+.tabGroup > input[type="radio"]:checked + label {
+  background-color:white;
+  font-weight: bold;
+  border-bottom: 1px solid white;
+  margin-bottom: -1px;
+  background: -webkit-linear-gradient(top, #FFF, #FFF 0%, #FFF);
+  -webkit-box-shadow: none !important;
+}
+ 
+.tabGroup > input[type="radio"]:hover + label {
+  -webkit-box-shadow: 0 0 20px #d0d0d0;
+}
+
+/* The tab content must fill the widgets size and have a nice border */
+.tabGroup > div {
+  display: none;
+  border: 1px solid #c6c9ce;
+  background-color: white;
+  padding: 10px 10px;
+  /*height: 100%;*/
+  overflow: auto;
+     
+  /*
+  box-shadow: 0 0 20px #444;
+  -moz-box-shadow: 0 0 20px #444;
+  -webkit-box-shadow: 0 0 20px #444;
+  */
+  -webkit-box-shadow: 0px 1px 0px #f7f7f7;
+  -webkit-box-shadow: 0 0 20px #d0d0d0;
+   
+  border-radius: 0 5px 5px 5px;
+  -moz-border-radius: 0 5px 5px 5px;
+  -webkit-border-radius: 0 5px 5px 5px;
+}
+ 
+/* This matchs tabs displaying to thier associated radio inputs */
+.tab1:checked ~ .tab1, .tab2:checked ~ .tab2, .tab3:checked ~ .tab3 {
+  display: block;
+}
