@@ -89,6 +89,7 @@ div#blacklist {
   width: 274px;
   /*height: 260px;*/
   /*height: 130px;*/
+  min-height: 130px;
 }
 
 div#blacklist div.row {
