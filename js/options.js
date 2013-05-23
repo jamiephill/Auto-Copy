@@ -93,32 +93,117 @@ function restoreOptions() {
     toggleDiv("diviurlap");
   }
 
-  if (!window.localStorage.blackList) {
-    alert("Here");
-    window.localStorage.blackList = {
-      'docs.google.com' : 1
-    };
-  } else {
-    window.localStorage.blackList = {};
-    window.localStorage.blackList["docs.google.com"] = 1;
-  }
-  // Need to get blacklist div, and add rows from localStorage.blackList
-  //var blEl = document.getElementById("blacklist");
-  //var len  = window.localStorage.blackList.length;
-  //var frag, divEl;
-  //var lsbl = window.localStorage.blackList;
-  //for (var i=0; i<len; i++) {
-    //frag = window.localStorage.blackList[i];
-    //blEl += '<div class="row">' + i + '</div>';
-    /*
+  var obl = blackListToObject(window.localStorage.blackList);
+
+  var blEl = document.getElementById("blacklist");
+  var frag, divEl;
+  for (var n in obl) {
     frag  = document.createDocumentFragment();
     divEl = document.createElement("div");
     frag.appendChild(divEl);
     divEl.className = "row";
-    divEl.innerHTML(i);
+    divEl.innerText = n;
     blEl.appendChild(frag);
-    */
-  //}
+  }
+  stripeList("div.row");
+}
+
+function stripeList(id) {
+  els = document.querySelectorAll(id);
+  len = els.length;
+
+  for (var i=0; i<len; i++) {
+    if (i % 2 === 0) {
+      if (!els[i].className.match(/stripe/)) {
+        els[i].className += " stripe";
+      }
+    } else {
+      els[i].className = els[i].className.replace(/ stripe/, "");
+    }
+  }
+}
+
+function addToBlackList() {
+  var domain = prompt("Domain name:");
+
+  domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+
+  var obl = blackListToObject();
+
+  if (obl[domain]) {
+    return;
+  }
+
+  obl[domain] = 1;
+  blackListToString(obl);
+
+  var blEl = document.getElementById("blacklist");
+  var frag, divEl;
+  frag  = document.createDocumentFragment();
+  divEl = document.createElement("div");
+  frag.appendChild(divEl);
+  divEl.className = "row";
+  divEl.addEventListener('click', function() {
+      if (this.className.match(/selected/)) {
+        this.className = this.className.replace(/\s?selected/, "");
+      } else {
+        this.className += " selected";
+      }
+  });
+  divEl.innerText = domain;
+  blEl.appendChild(frag);
+
+  stripeList("div.row");
+}
+
+function removeSelectedFromBlackList() {
+  var els    = document.querySelectorAll('div.selected');
+  var len    = els.length;
+  var domain = "";
+
+  var obl = blackListToObject();
+  for (var i=0; i<len; i++) {
+    domain = els[i].innerText;
+    if (obl[domain] && domain === "docs.google.com") {
+      obl[domain] = 0;
+    } else if (obl[domain]) {
+      delete obl[domain];
+    }
+    els[i].parentNode.removeChild(els[i]);
+  }
+
+  blackListToString(obl);
+  stripeList("div.row");
+}
+
+function blackListToObject() {
+  var domains    = window.localStorage.blackList.split(",");
+  var len        = domains.length
+  var oBlackList = {};
+  var domain, flag;
+  var parts      = [];
+  for (var i=0; i<len; i++) {
+    parts = domains[i].split(":");
+    if (parts[1] === "1") {
+      oBlackList[parts[0]] = parts[1];
+    }
+  }
+
+  if (len === 0) {
+    oBlackList["docs.google.com"] = "1";
+    blackListToString(oBlackList);
+  }
+
+  return(oBlackList);
+}
+
+function blackListToString(oBlackList) {
+  var arr       = [];
+  for (var n in oBlackList) {
+    arr.push(n + ":" + oBlackList[n]);
+  }
+
+  window.localStorage.blackList = arr.join(",");
 }
 
 function validateCountValue() {
@@ -213,6 +298,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('iurltext').addEventListener(
       'click', document.getElementById('iurltext').select
     );
+    document.getElementById('removeBtn').addEventListener(
+      'click', removeSelectedFromBlackList
+    );
+    document.getElementById('addBtn').addEventListener(
+      'click', addToBlackList
+    );
     //document.getElementById('saveButton').addEventListener(
     //  'click', saveOptions
     //);
@@ -232,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
     for (var i=0; i<len; i++) {
       els[i].addEventListener('click', function() {
           if (this.className.match(/selected/)) {
-            this.className = this.className.replace(/\s?selected/, '');
+            this.className = this.className.replace(/\s?selected/, "");
           } else {
             this.className += " selected";
           }

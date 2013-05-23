@@ -87,7 +87,8 @@ div#blacklist {
   margin: 3px 3px 3px 0;
   overflow: auto;
   width: 274px;
-  height: 260px;
+  /*height: 260px;*/
+  /*height: 130px;*/
 }
 
 div#blacklist div.row {
@@ -100,7 +101,7 @@ div#blacklist div.row:last-of-type {
   border: none;
 }
 
-div#blacklist div.alt {
+div#blacklist div.stripe {
   background-color: #EAEAEA;
 }
 
