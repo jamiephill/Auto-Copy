@@ -124,7 +124,10 @@ function stripeList(id) {
 }
 
 function addToBlackList() {
-  var domain = prompt("Domain name:");
+  //var domain = prompt("Domain name:");
+  var overlay = document.getElementById("overlay");
+  overlay.style.visibility = "hidden";
+  var domain = document.getElementById("domaintext").value;
 
   domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
 
@@ -302,12 +305,26 @@ document.addEventListener('DOMContentLoaded', function () {
       'click', removeSelectedFromBlackList
     );
     document.getElementById('addBtn').addEventListener(
+      'click', function() {
+        var overlay = document.getElementById("overlay");
+        overlay.style.visibility = "visible";
+        document.getElementById("domaintext").select();
+    });
+    document.getElementById('addOverlayBtn').addEventListener(
       'click', addToBlackList
     );
-    //document.getElementById('saveButton').addEventListener(
-    //  'click', saveOptions
-    //);
-    //
+    document.getElementById("domaintext").addEventListener(
+      'keyup', function(e) {
+        if (e.keyCode == 13) {
+          addToBlackList();
+        }
+    });
+    document.getElementById('cancelOverlayBtn').addEventListener(
+      'click', function() {
+        var overlay = document.getElementById("overlay");
+        overlay.style.visibility = "hidden";
+    });
+
     var els = document.querySelectorAll(".autosave");
     var len = els.length;
     for (var i=0; i<len; i++) {
