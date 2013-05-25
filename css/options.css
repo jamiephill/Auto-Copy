@@ -6,6 +6,18 @@ div#diviurlap {
   display: none;
 }
 
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: rgb(0, 0, 238);
+}
+
 .error {
   color: #FF0000;
 }
@@ -220,4 +232,9 @@ div#overlay div {
 
 div#overlay div span {
   margin-left: 2px;
+}
+
+div#overlay div span span#addError {
+  color: #FA4B4B;
+  visibility: hidden;
 }

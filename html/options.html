@@ -84,12 +84,30 @@
         </div>
       </div>
       <div class="tab tab3">
-        About
+        <p><a target="_blank" href="http://stratusnine.com/software/auto-copy/">Auto Copy</a> is a Chrome extension that will automatically copy any selected text to the clipboard.</p>
+
+        <h2>Features</h2>
+        <p>Auto Copy has several features that are configurable from the options page:</p>
+
+        <ul>
+          <li>Enable/disable auto copy for text fields</li>
+          <li>Include a comment with copied text. The comment can be formated and has macro expansion.</li>
+          <li>Paste on middle-click</li>
+          <li>Blacklists to allow disabling of the extension on certain websites</li>
+        </ul>
+
+        <h2>Notes</h2>
+        <p>The extension only works on pages with http:// or https:// in the URL. Also, content-scripts are automatically disabled in the Chrome Web Store for security reasons. Please keep this in mind when testing the extension.</p>
+
+        <p>When an option is changed, web pages must be reloaded before the changed option will take effect.</p>
+
+        <h2>Contact</h2>
+        <p>If you have a feature request, bug fix, or general feedback please feel free to get in touch with me on <a target="_blank" href="https://twitter.com/stratus9">twitter</a> or <a target="_blank" href="mailto:jamiephill@gmail.com">email</a>.
       </div>
     </div>
     <div id="overlay">
       <div>
-        <span>Domain name:</span>
+        <span>Domain name: <span id="addError"></span></span>
         <br>
         <input type="text" size="64" id="domaintext">
         <button id="addOverlayBtn">Add</button>

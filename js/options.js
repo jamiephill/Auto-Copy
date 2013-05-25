@@ -1,8 +1,14 @@
+var blackList = {
+  "init" : true
+};
+
 function saveOptions() {
   if (!window.localStorage) {
     alert("Error local storage is unavailable.");
     //window.close();
   }
+
+  console.log("in save");
 
   window.localStorage.enableForTextBoxes = 
     document.getElementById("eitb").checked ? true : false;
@@ -93,18 +99,31 @@ function restoreOptions() {
     toggleDiv("diviurlap");
   }
 
-  var obl = blackListToObject(window.localStorage.blackList);
+  blackListToObject();
+}
 
-  var blEl = document.getElementById("blacklist");
-  var frag, divEl;
+function initBlackListDiv(obl) {
   for (var n in obl) {
-    frag  = document.createDocumentFragment();
-    divEl = document.createElement("div");
-    frag.appendChild(divEl);
-    divEl.className = "row";
-    divEl.innerText = n;
-    blEl.appendChild(frag);
+    addBlackListRow(n);
   }
+}
+
+function addBlackListRow(text) {
+  var blEl  = document.getElementById("blacklist");
+  var frag  = document.createDocumentFragment();
+  var divEl = document.createElement("div");
+  frag.appendChild(divEl);
+  divEl.className = "row";
+  divEl.innerText = text;
+  divEl.addEventListener('click', function() {
+    if (this.className.match(/selected/)) {
+      this.className = this.className.replace(/\s?selected/, "");
+    } else {
+      this.className += " selected";
+    }
+  });
+  blEl.appendChild(frag);
+
   stripeList("div.row");
 }
 
@@ -124,39 +143,32 @@ function stripeList(id) {
 }
 
 function addToBlackList() {
-  //var domain = prompt("Domain name:");
-  var overlay = document.getElementById("overlay");
-  overlay.style.visibility = "hidden";
-  var domain = document.getElementById("domaintext").value;
+  var overlay    = document.getElementById("overlay");
+  var addErrorEl = document.getElementById("addError")
+  var domain     = document.getElementById("domaintext").value;
 
-  domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+  addErrorEl.style.visibility = "hidden";
 
-  var obl = blackListToObject();
-
-  if (obl[domain]) {
+  if (!domain.match(/\./)) {
+    addErrorEl.innerText = "Error: speficied domain is invalid";
+    addErrorEl.style.visibility = "visible";
     return;
   }
 
-  obl[domain] = 1;
-  blackListToString(obl);
+  domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
 
-  var blEl = document.getElementById("blacklist");
-  var frag, divEl;
-  frag  = document.createDocumentFragment();
-  divEl = document.createElement("div");
-  frag.appendChild(divEl);
-  divEl.className = "row";
-  divEl.addEventListener('click', function() {
-      if (this.className.match(/selected/)) {
-        this.className = this.className.replace(/\s?selected/, "");
-      } else {
-        this.className += " selected";
-      }
-  });
-  divEl.innerText = domain;
-  blEl.appendChild(frag);
+  if (blackList[domain]) {
+    addErrorEl.innerText = "Error: speficied domain is already in the list";
+    addErrorEl.style.visibility = "visible";
+    return;
+  }
 
-  stripeList("div.row");
+  overlay.style.visibility = "hidden";
+
+  blackList[domain] = 1;
+  blackListToString(blackList);
+
+  addBlackListRow(domain);
 }
 
 function removeSelectedFromBlackList() {
@@ -164,73 +176,46 @@ function removeSelectedFromBlackList() {
   var len    = els.length;
   var domain = "";
 
-  var obl = blackListToObject();
   for (var i=0; i<len; i++) {
     domain = els[i].innerText;
-    if (obl[domain] && domain === "docs.google.com") {
-      obl[domain] = 0;
-    } else if (obl[domain]) {
-      delete obl[domain];
+    if (blackList[domain] && domain === "docs.google.com") {
+      blackList[domain] = 0;
+    } else if (blackList[domain]) {
+      delete blackList[domain];
     }
     els[i].parentNode.removeChild(els[i]);
   }
 
-  blackListToString(obl);
+  blackListToString(blackList);
   stripeList("div.row");
 }
 
 function blackListToObject() {
-  var domains    = window.localStorage.blackList.split(",");
-  var len        = domains.length
-  var oBlackList = {};
-  var domain, flag;
-  var parts      = [];
-  for (var i=0; i<len; i++) {
-    parts = domains[i].split(":");
-    if (parts[1] === "1") {
-      oBlackList[parts[0]] = parts[1];
+  chrome.extension.sendMessage({"type" : "getBlackList"}, function (resp) {
+    var flag = (blackList.init) ? 1 : 0;
+    blackList = resp;
+
+    if (flag) {
+      initBlackListDiv(blackList);
     }
-  }
+  });
 
-  if (len === 0) {
-    oBlackList["docs.google.com"] = "1";
-    blackListToString(oBlackList);
-  }
-
-  return(oBlackList);
+  return(blackList);
 }
 
 function blackListToString(oBlackList) {
-  var arr       = [];
-  for (var n in oBlackList) {
-    arr.push(n + ":" + oBlackList[n]);
-  }
+  var blackList = {};
 
-  window.localStorage.blackList = arr.join(",");
+  chrome.extension.sendMessage({
+    "type" : "writeBlackList", "blackList" : oBlackList}
+  );
 }
 
 function validateCountValue() {
   var enabled = document.getElementById('iurlewc');
   var el      = document.getElementById('iurlcount');
-  var count   = parseInt(el.value,10);
-  //var saveBtn = document.getElementById('saveButton');
-  var text    = document.getElementById('commentCount');
 
-  if (enabled.checked) {
-    el.disabled = false;
-    if (count < 1 || count > 99 || isNaN(count)) {
-      //el.value = 5;
-      //saveBtn.disabled = true;
-      //text.className = "error";
-    } else {
-      //saveBtn.disabled = false;
-      //text.className = "";
-    }
-  } else {
-    el.disabled = true;
-    //saveBtn.disabled = false;
-    //text.className = "";
-  }
+  el.disabled = (enabled.checked) ? false : true;
 }
   
 function toggleCapt() {
@@ -281,7 +266,6 @@ function toggleDiv(id) {
 
 document.addEventListener('DOMContentLoaded', function () {
     restoreOptions();
-    //$("ul.tabs").tabs("div.panes > div");
 
     document.getElementById('iurl').addEventListener('click', function() {
       toggleDiv('diviurlap'); toggleCapt();
@@ -321,29 +305,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.getElementById('cancelOverlayBtn').addEventListener(
       'click', function() {
-        var overlay = document.getElementById("overlay");
-        overlay.style.visibility = "hidden";
+        document.getElementById("overlay").style.visibility = "hidden";
+        document.getElementById("addError").style.visibility = "hidden";
     });
 
     var els = document.querySelectorAll(".autosave");
     var len = els.length;
     for (var i=0; i<len; i++) {
       if (els[i].type === "text") {
-        els[i].addEventListener('change', saveOptions);
+        els[i].addEventListener('keyup', saveOptions);
       } else {
         els[i].addEventListener('click', saveOptions);
       }
-    }
-
-    els = document.querySelectorAll("div.row");
-    len = els.length;
-    for (var i=0; i<len; i++) {
-      els[i].addEventListener('click', function() {
-          if (this.className.match(/selected/)) {
-            this.className = this.className.replace(/\s?selected/, "");
-          } else {
-            this.className += " selected";
-          }
-      });
     }
 });
