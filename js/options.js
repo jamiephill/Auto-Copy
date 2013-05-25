@@ -265,8 +265,6 @@ function toggleDiv(id) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    restoreOptions();
-
     document.getElementById('iurl').addEventListener('click', function() {
       toggleDiv('diviurlap'); toggleCapt();
     });
@@ -318,4 +316,6 @@ document.addEventListener('DOMContentLoaded', function () {
         els[i].addEventListener('click', saveOptions);
       }
     }
+
+    restoreOptions();
 });

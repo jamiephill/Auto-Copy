@@ -45,6 +45,12 @@ chrome.extension.sendMessage(
       (resp.includeUrlText === " ") ? "" : resp.includeUrlText;
     opts.blackList = resp.blackList;
 
+    var i;
+    console.log("Walk blacklist");
+    for (i in opts.blackList) {
+      console.log("autoCopy: blacklist entry: "+i+" -> "+opts.blackList[i]);
+    }
+
     var arr = window.location.hostname.split(".");
     if (arr.length <= 0) {
       console.log("window.location.hostname is empty");
@@ -53,7 +59,7 @@ chrome.extension.sendMessage(
 
     var domain;
     var flag = false;
-    for (var i in arr) {
+    for (i in arr) {
       if (arr.length < 2) {
         break;
       }

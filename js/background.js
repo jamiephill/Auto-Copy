@@ -59,16 +59,30 @@ function blackListToObject() {
   var len        = domains.length
   var oBlackList = {};
   var parts      = [];
-  for (var i=0; i<len; i++) {
+  var i;
+
+  if (len === 1 && !domains[0]) {
+    console.log("domains is empty");
+    len = 0;
+  }
+
+  console.log("In blackListToObject");
+  for (i=0; i<len; i++) {
     parts = domains[i].split(":");
-    if (parts[1] === "1") {
-      oBlackList[parts[0]] = parseInt(parts[1],10);
-    }
+
+    oBlackList[parts[0]] = parseInt(parts[1],10);
   }
 
   if (len === 0) {
+    console.log("setting blacklist for first time");
     oBlackList["docs.google.com"] = 1;
     blackListToString(oBlackList);
+  }
+
+
+  console.log("walking blacklist");
+  for (i in oBlackList) {
+    console.log("blacklist entry: "+i+" -> "+oBlackList[i]);
   }
 
   return(oBlackList);
