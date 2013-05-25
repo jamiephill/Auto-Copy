@@ -55,16 +55,17 @@ function blackListToString(oBlackList) {
 }
 
 function blackListToObject() {
+  var oBlackList = {};
+
+  if (!window.localStorage.blackList) {
+    console.log("setting blacklist for first time");
+    window.localStorage.blackList = "docs.google.com:1";
+  }
+
   var domains    = window.localStorage.blackList.split(",");
   var len        = domains.length
-  var oBlackList = {};
   var parts      = [];
   var i;
-
-  if (len === 1 && !domains[0]) {
-    console.log("domains is empty");
-    len = 0;
-  }
 
   console.log("In blackListToObject");
   for (i=0; i<len; i++) {
@@ -72,13 +73,6 @@ function blackListToObject() {
 
     oBlackList[parts[0]] = parseInt(parts[1],10);
   }
-
-  if (len === 0) {
-    console.log("setting blacklist for first time");
-    oBlackList["docs.google.com"] = 1;
-    blackListToString(oBlackList);
-  }
-
 
   console.log("walking blacklist");
   for (i in oBlackList) {
