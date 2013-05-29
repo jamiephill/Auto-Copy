@@ -27,7 +27,7 @@ chrome.extension.sendMessage(
     ] 
   }, 
   function (resp) {
-    console.log("autoCopy: got sendMessage response: "+resp);
+    //console.log("autoCopy: got sendMessage response: "+resp);
     opts.init = true;
     opts.enableForTextBoxes = 
       (resp.enableForTextBoxes === "true") ? true : false;
@@ -46,14 +46,14 @@ chrome.extension.sendMessage(
     opts.blackList = resp.blackList;
 
     var i;
-    console.log("Walk blacklist");
-    for (i in opts.blackList) {
-      console.log("autoCopy: blacklist entry: "+i+" -> "+opts.blackList[i]);
-    }
+    //console.log("Walk blacklist");
+    //for (i in opts.blackList) {
+    //  console.log("autoCopy: blacklist entry: "+i+" -> "+opts.blackList[i]);
+    //}
 
     var arr = window.location.hostname.split(".");
     if (arr.length <= 0) {
-      console.log("window.location.hostname is empty");
+      //console.log("window.location.hostname is empty");
       return;
     } 
 
@@ -64,7 +64,7 @@ chrome.extension.sendMessage(
         break;
       }
       domain = arr.join(".");
-      console.log("Domain walk: "+domain);
+      //console.log("Domain walk: "+domain);
       if (opts.blackList[domain] == 1) {
         flag = true;
         break;
@@ -73,12 +73,12 @@ chrome.extension.sendMessage(
     }
 
     if (!domain) {
-      console.log("Domain is undefined: "+window.location.hostname);
+      //console.log("Domain is undefined: "+window.location.hostname);
       return;
     }
 
     if (!flag) {
-      console.log("autoCopy: enabled for "+domain);
+      //console.log("autoCopy: enabled for "+domain);
       document.body.addEventListener("mouseup", autoCopy, false);
 
       if (!opts.enableForTextBoxes) {
@@ -91,7 +91,7 @@ chrome.extension.sendMessage(
         );
       }
     } else {
-      console.log("autoCopy: domain is blacklisted, disabling: "+domain);
+      //console.log("autoCopy: domain is blacklisted, disabling: "+domain);
     }
   }
 );
@@ -114,10 +114,10 @@ chrome.extension.sendMessage(
 function autoCopy(e) {
   var rv, s, el, text;
 
-  console.log("autoCopy: detected a mouse event");
+  //console.log("autoCopy: detected a mouse event");
   
   if (opts.pasteOnMiddleClick && e.button === 1) {
-    console.log("autoCopy: detected paste on middle click");
+    //console.log("autoCopy: detected paste on middle click");
     try {
       chrome.extension.sendMessage(
         {
@@ -154,7 +154,7 @@ function autoCopy(e) {
     (opts.mouseDownTarget.nodeName === "INPUT" ||
     opts.mouseDownTarget.nodeName === "TEXTAREA") 
   ){
-    console.log("autoCopy is not enabled for text boxes");
+    //console.log("autoCopy is not enabled for text boxes");
     return;
   }
     
@@ -176,11 +176,11 @@ function autoCopy(e) {
     // Don't execute the copy if nothing is selected.
     //-------------------------------------------------------------------------
     if (text.length <= 0) {
-      console.log("autoCopy: selection was empty");
+      //console.log("autoCopy: selection was empty");
       return;
     }
 
-    console.log("autoCopy: got selectection: "+text);
+    //console.log("autoCopy: got selectection: "+text);
 
     if (opts.copyAsPlainText || opts.includeUrl) {
       count = (text.split(/\s+/)).length;
@@ -189,13 +189,13 @@ function autoCopy(e) {
         opts.includeUrlCommentCountEnabled &&
         count <= opts.includeUrlCommentCount
       ) {
-        console.log("autoCopy: setting flag to false");
+        //console.log("autoCopy: setting flag to false");
         flag = false;
       } 
 
       if (opts.includeUrl && opts.includeUrlText && flag) {
         comment = opts.includeUrlText;
-        console.log("autoCopy: format: "+comment);
+        //console.log("autoCopy: format: "+comment);
 
         if (opts.includeUrlText.indexOf('$title') >= 0) {
           comment = comment.replace(/\$title/g, document.title);
@@ -210,23 +210,23 @@ function autoCopy(e) {
         }
 
         if (opts.prependUrl) {
-          console.log("autoCopy: prepending comment: "+comment);
+          //console.log("autoCopy: prepending comment: "+comment);
           text = comment + "\n" + text;
         } else {
-          console.log("autoCopy: postpending comment: "+comment);
+          //console.log("autoCopy: postpending comment: "+comment);
           text += "\n" + comment;
         }
       }
 
-      console.log("autoCopy: sending copy as plain text: ",text);
+      //console.log("autoCopy: sending copy as plain text: ",text);
       chrome.extension.sendMessage({
           "type" : "reformat",
           "text" : text,
       });
     } else {
-      console.log("autoCopy: executing copy");
+      //console.log("autoCopy: executing copy");
       rv = document.execCommand("copy");
-      console.log("autoCopy: copied: "+rv);
+      //console.log("autoCopy: copied: "+rv);
     }
   } catch (ex) {
     console.log("Caught exception: "+ex);

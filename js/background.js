@@ -22,9 +22,9 @@ chrome.extension.onMessage.addListener(
         document.body.appendChild(el);
         el.value = req.text;
         el.select();
-        console.log("textArea value: "+el.value);
+        //console.log("textArea value: "+el.value);
         rv = document.execCommand("copy");
-        console.log("Copy: "+rv);
+        //console.log("Copy: "+rv);
         document.body.removeChild(el);
       }
     } else if (req.type === "paste") {
@@ -33,7 +33,7 @@ chrome.extension.onMessage.addListener(
       el.value = "";
       el.select();
       var rv = document.execCommand("paste");
-      console.log("Paste: "+rv);
+      //console.log("Paste: "+rv);
       rv = el.value
       document.body.removeChild(el);
       callback(rv);
@@ -58,7 +58,7 @@ function blackListToObject() {
   var oBlackList = {};
 
   if (!window.localStorage.blackList) {
-    console.log("setting blacklist for first time");
+    //console.log("setting blacklist for first time");
     window.localStorage.blackList = "docs.google.com:1";
   }
 
@@ -67,17 +67,17 @@ function blackListToObject() {
   var parts      = [];
   var i;
 
-  console.log("In blackListToObject");
+  //console.log("In blackListToObject");
   for (i=0; i<len; i++) {
     parts = domains[i].split(":");
 
     oBlackList[parts[0]] = parseInt(parts[1],10);
   }
 
-  console.log("walking blacklist");
-  for (i in oBlackList) {
-    console.log("blacklist entry: "+i+" -> "+oBlackList[i]);
-  }
+  //console.log("walking blacklist");
+  //for (i in oBlackList) {
+  //  console.log("blacklist entry: "+i+" -> "+oBlackList[i]);
+  //}
 
   return(oBlackList);
 }

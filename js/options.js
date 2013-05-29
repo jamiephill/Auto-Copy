@@ -8,7 +8,7 @@ function saveOptions() {
     //window.close();
   }
 
-  console.log("in save");
+  //console.log("in save");
 
   window.localStorage.enableForTextBoxes = 
     document.getElementById("eitb").checked ? true : false;
