@@ -151,8 +151,8 @@ function autoCopy(e) {
   
   if (
     !opts.enableForTextBoxes &&
-    && opts.mouseDownTarget
-    && opts.mouseDownTarget.nodeName
+    opts.mouseDownTarget &&
+    opts.mouseDownTarget.nodeName &&
     (opts.mouseDownTarget.nodeName === "INPUT" ||
     opts.mouseDownTarget.nodeName === "TEXTAREA") 
   ){
