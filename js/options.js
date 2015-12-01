@@ -10,6 +10,10 @@ function saveOptions() {
 
   //console.log("in save");
 
+  window.localStorage.alertOnCopy = 
+    document.getElementById("aoc").checked ? true : false;
+  window.localStorage.removeSelectionOnCopy = 
+    document.getElementById("rsoc").checked ? true : false;
   window.localStorage.enableForTextBoxes = 
     document.getElementById("eitb").checked ? true : false;
   window.localStorage.pasteOnMiddleClick = 
@@ -17,10 +21,18 @@ function saveOptions() {
   //---------------------------------------------------------------------
   // Working around an issue in Chrome 6
   //---------------------------------------------------------------------
-  //window.localStorage.copyAsPlainText = 
-  //  document.getElementById("capt").checked ? true : false;
-  window.localStorage.copyAsPlainText = true;
+  window.localStorage.copyAsPlainText = 
+    document.getElementById("capt").checked ? true : false;
+  //window.localStorage.copyAsPlainText = true;
   //---------------------------------------------------------------------
+  window.localStorage.ctrlToDisable = 
+    document.getElementById("dc").checked ? true : false;
+  window.localStorage.ctrlToDisableKey = 
+    document.getElementById("dck").value;
+  window.localStorage.altToCopyAsLink = 
+    document.getElementById("acal").checked ? true : false;
+  window.localStorage.copyAsLink = 
+    document.getElementById("cal").checked ? true : false;
   window.localStorage.includeUrl = 
     document.getElementById("iurl").checked ? true : false;
   window.localStorage.prependUrl = 
@@ -55,6 +67,10 @@ function restoreOptions() {
     window.close();
   }
   
+  document.getElementById("aoc").checked = 
+    (window.localStorage.alertOnCopy === "true") ? true : false;
+  document.getElementById("rsoc").checked = 
+    (window.localStorage.removeSelectionOnCopy === "true") ? true : false;
   document.getElementById("eitb").checked = 
     (window.localStorage.enableForTextBoxes === "true") ? true : false;
   document.getElementById("pomc").checked = 
@@ -62,10 +78,18 @@ function restoreOptions() {
   //---------------------------------------------------------------------
   // Working around an issue in Chrome 6
   //---------------------------------------------------------------------
-  //document.getElementById("capt").checked = 
-  //  (window.localStorage.copyAsPlainText === "true") ? true : false;
-  document.getElementById("capt").checked = true;
+  document.getElementById("capt").checked = 
+    (window.localStorage.copyAsPlainText === "true") ? true : false;
+  //document.getElementById("capt").checked = true;
   //---------------------------------------------------------------------
+  document.getElementById("dc").checked = 
+    (window.localStorage.ctrlToDisable === "true") ? true : false;
+  document.getElementById("dck").value = 
+    window.localStorage.ctrlToDisableKey || 'ctrl';
+  document.getElementById("acal").checked = 
+    (window.localStorage.altToCopyAsLink === "true") ? true : false;
+  document.getElementById("cal").checked = 
+    (window.localStorage.copyAsLink === "true") ? true : false;
   document.getElementById("iurl").checked = 
     (window.localStorage.includeUrl === "true") ? true : false;
   document.getElementById("iurltext").value = 
@@ -100,11 +124,12 @@ function restoreOptions() {
   }
 
   blackListToObject();
+  handleExclusivity();
 }
 
 function initBlackListDiv(obl) {
   for (var n in obl) {
-    addBlackListRow(n);
+    addBlackListRow(decodeURIComponent(n));
   }
 }
 
@@ -115,6 +140,7 @@ function addBlackListRow(text) {
   frag.appendChild(divEl);
   divEl.className = "row";
   divEl.innerText = text;
+  divEl.title = text;
   divEl.addEventListener('click', function() {
     if (this.className.match(/selected/)) {
       this.className = this.className.replace(/\s?selected/, "");
@@ -143,45 +169,73 @@ function stripeList(id) {
 }
 
 function addToBlackList() {
-  var overlay    = document.getElementById("overlay");
-  var addErrorEl = document.getElementById("addError")
-  var domain     = document.getElementById("domaintext").value;
+  var overlay     = document.getElementById("overlay");
+  var addErrorEl  = document.getElementById("addError")
+  var domain      = document.getElementById("domaintext").value;
+  var selectionD  = document.getElementById("blacklistDomain").checked;
+  var encodedDomain, parsedDomain;
 
-  addErrorEl.style.visibility = "hidden";
+  addErrorEl.style.display = "none";
 
-  if (!domain.match(/\./)) {
-    addErrorEl.innerText = "Error: speficied domain is invalid";
-    addErrorEl.style.visibility = "visible";
-    return;
+  if (selectionD) {
+    if (!domain.match(/\./)) {
+      addErrorEl.innerText = "Error: speficied domain is invalid";
+      addErrorEl.style.display = "block";
+      return;
+    }
+
+    domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+    encodedDomain = encodeURIComponent(domain);
+
+    if (blackList[encodedDomain]) {
+      addErrorEl.innerText = 
+        "Error: speficied domain is already in the list";
+      addErrorEl.style.display = "block";
+      return;
+    }
+  } else {
+    if (!domain.match(/\./) && !domain.match(/\//)) {
+      addErrorEl.innerText = "Error: speficied page is invalid";
+      addErrorEl.style.display = "block";
+      return;
+    }
+
+    parsedDomain  = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+    encodedDomain = encodeURIComponent(domain);
+
+    if (blackList[parsedDomain]) {
+      addErrorEl.innerText = 
+        "Error: speficied page's domain is already in the list";
+      addErrorEl.style.display = "block";
+      return;
+    } else if (blackList[encodedDomain]) {
+      addErrorEl.innerText = 
+        "Error: speficied page is already in the list";
+      addErrorEl.style.display = "block";
+      return;
+    }
   }
 
-  domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+  addErrorEl.style.display = "none";
 
-  if (blackList[domain]) {
-    addErrorEl.innerText = "Error: speficied domain is already in the list";
-    addErrorEl.style.visibility = "visible";
-    return;
-  }
-
-  overlay.style.visibility = "hidden";
-
-  blackList[domain] = 1;
+  blackList[encodedDomain] = 1;
   blackListToString(blackList);
-
   addBlackListRow(domain);
 }
 
 function removeSelectedFromBlackList() {
-  var els    = document.querySelectorAll('div.selected');
-  var len    = els.length;
-  var domain = "";
+  var els           = document.querySelectorAll('div.selected');
+  var len           = els.length;
+  var domain        = "";
+  var encodedDomain = "";
 
   for (var i=0; i<len; i++) {
     domain = els[i].innerText;
-    if (blackList[domain] && domain === "docs.google.com") {
-      blackList[domain] = 0;
-    } else if (blackList[domain]) {
-      delete blackList[domain];
+    encodedDomain = encodeURIComponent(domain);
+    if (blackList[encodedDomain] && domain === "docs.google.com") {
+      blackList[encodedDomain] = 0;
+    } else if (blackList[encodedDomain]) {
+      delete blackList[encodedDomain];
     }
     els[i].parentNode.removeChild(els[i]);
   }
@@ -218,6 +272,7 @@ function validateCountValue() {
   el.disabled = (enabled.checked) ? false : true;
 }
   
+/*
 function toggleCapt() {
   var capt = document.getElementById('capt');
   var iurl = document.getElementById('iurl').checked;
@@ -236,6 +291,7 @@ function toggleCapt() {
       (window.localStorage.copyAsPlainText === "true") ? true : false;
   }
 }
+*/
 
 function fixUpIncludeUrl() {
   var capt    = document.getElementById('capt').checked;
@@ -264,12 +320,47 @@ function toggleDiv(id) {
   el.style.display = (el.style.display === "block") ? "none" : "block";
 }
 
+function handleExclusivity() {
+  var cal  = document.getElementById('cal');
+  var capt = document.getElementById('capt');
+  var iurl = document.getElementById('iurl');
+
+  if (cal.checked) {
+    capt.disabled = true;
+    capt.checked  = false;
+    iurl.disabled = true;
+    iurl.checked  = false;
+  } else {
+    capt.disabled = false;
+    iurl.disabled = false;
+  }
+
+  if (capt.checked || iurl.checked) {
+    cal.disabled = true;
+    cal.checked  = false;
+  } else {
+    cal.disabled = false;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('iurl').addEventListener('click', function() {
-      toggleDiv('diviurlap'); toggleCapt();
+      toggleDiv('diviurlap'); //toggleCapt();
     });
     document.getElementById('iurlewc').addEventListener(
       'click', validateCountValue
+    );
+    //document.getElementById('capt').addEventListener(
+    //  'click', fixUpIncludeUrl
+    //);
+    document.getElementById('cal').addEventListener(
+      'click', handleExclusivity
+    );
+    document.getElementById('capt').addEventListener(
+      'click', handleExclusivity
+    );
+    document.getElementById('iurl').addEventListener(
+      'click', handleExclusivity
     );
     document.getElementById('iurlcount').addEventListener(
       'click', document.getElementById('iurlcount').select
@@ -304,16 +395,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('cancelOverlayBtn').addEventListener(
       'click', function() {
         document.getElementById("overlay").style.visibility = "hidden";
-        document.getElementById("addError").style.visibility = "hidden";
+        document.getElementById("addError").style.display = "none";
     });
 
     var els = document.querySelectorAll(".autosave");
     var len = els.length;
     for (var i=0; i<len; i++) {
-      if (els[i].type === "text") {
-        els[i].addEventListener('keyup', saveOptions);
+      if (els[i].nodeName === "SELECT") {
+          els[i].addEventListener('change', saveOptions);
       } else {
-        els[i].addEventListener('click', saveOptions);
+        if (els[i].type === "text") {
+          els[i].addEventListener('keyup', saveOptions);
+        } else {
+          els[i].addEventListener('click', saveOptions);
+        }
       }
     }
 

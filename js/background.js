@@ -1,6 +1,6 @@
 chrome.extension.onMessage.addListener(
   function (req, sender, callback) {
-    var rv, el, i, len, resp = {};
+    var rv, el, i, len, range, s, resp = {};
     if (req.type === "config") {
       if (window.localStorage != null && req.keys != null) {
         len = req.keys.length;
@@ -16,15 +16,44 @@ chrome.extension.onMessage.addListener(
       } else {
         callback({});
       }
+    } else if (req.type === "includeComment") {
+        el = document.createElement('div');
+	el.contentEditable='true';
+        document.body.appendChild(el);
+	el.unselectable = 'off';
+	el.focus();
+	rv = document.execCommand('paste');
+	//console.log("Paste: " + rv);
+	if (req.opts.prependUrl) {
+	  el.innerHTML = req.comment + '<br>' + el.innerHTML;
+	} else {
+	  el.innerHTML = el.innerHTML + '<br>' + req.comment;
+	}
+	document.execCommand('SelectAll');
+        rv = document.execCommand("copy");
+        document.body.removeChild(el);
+    } else if (req.type === "asLink") {
+      if (req.text && req.text.length > 0) {
+        el = document.createElement('div');
+	el.innerHTML = '<a title="' + req.title + '" href="' + req.href + 
+          '">' + req.text + '</a>';
+	el.contentEditable='true';
+        document.body.appendChild(el);
+	el.unselectable = 'off';
+	el.focus();
+	document.execCommand('SelectAll');
+        rv = document.execCommand("copy");
+        document.body.removeChild(el);
+      }
     } else if (req.type === "reformat") {
-      if (req.text.length > 0) {
+      if (req.text && req.text.length > 0) {
         el = document.createElement('textarea');
         document.body.appendChild(el);
         el.value = req.text;
         el.select();
-        //console.log("textArea value: "+el.value);
+        //console.log("textArea value: " + el.value);
         rv = document.execCommand("copy");
-        //console.log("Copy: "+rv);
+        //console.log("Copy: " + rv);
         document.body.removeChild(el);
       }
     } else if (req.type === "paste") {
@@ -33,7 +62,7 @@ chrome.extension.onMessage.addListener(
       el.value = "";
       el.select();
       var rv = document.execCommand("paste");
-      //console.log("Paste: "+rv);
+      //console.log("Paste: " + rv);
       rv = el.value
       document.body.removeChild(el);
       callback(rv);
@@ -46,7 +75,7 @@ chrome.extension.onMessage.addListener(
 );
 
 function blackListToString(oBlackList) {
-  var arr       = [];
+  var arr = [];
   for (var n in oBlackList) {
     arr.push(n + ":" + oBlackList[n]);
   }
@@ -74,9 +103,9 @@ function blackListToObject() {
     oBlackList[parts[0]] = parseInt(parts[1],10);
   }
 
-  //console.log("walking blacklist");
+  //console.log("Walking blacklist");
   //for (i in oBlackList) {
-  //  console.log("blacklist entry: "+i+" -> "+oBlackList[i]);
+  //  console.log("  Blacklist entry: " + i + " -> " + oBlackList[i]);
   //}
 
   return(oBlackList);
