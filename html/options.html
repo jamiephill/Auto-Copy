@@ -31,6 +31,8 @@
         <br>
         <input class="autosave" type="checkbox" id="eitb"> <label for="eitb">Enable in text boxes</label>
         <br>
+        <input class="autosave" type="checkbox" id="eice"> <label for="eice">Enable in content editable elements</label>
+        <br>
         <!---->
 	<input class="autosave" type="checkbox" id="pomc"> <label for="pomc">Paste on middle click</label>
         <br>
@@ -39,7 +41,10 @@
 			<option value="ctrl">CTRL</option>
 			<option value="shift">Shift</option>
 		</select>
-		key while selecting to disable Auto Copy
+		key while selecting to <select class="autosave" id="acs">
+			<option value="enable">enable</option>
+			<option value="disable">disable</option>
+		</select> Auto Copy
 	</label>
         <br>
 	<input class="autosave" type="checkbox" id="acal"> <label for="cal">Press ALT to copy as HTML link</label>

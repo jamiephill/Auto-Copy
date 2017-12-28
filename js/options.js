@@ -5,10 +5,7 @@ var blackList = {
 function saveOptions() {
   if (!window.localStorage) {
     alert("Error local storage is unavailable.");
-    //window.close();
   }
-
-  //console.log("in save");
 
   window.localStorage.alertOnCopy = 
     document.getElementById("aoc").checked ? true : false;
@@ -16,19 +13,18 @@ function saveOptions() {
     document.getElementById("rsoc").checked ? true : false;
   window.localStorage.enableForTextBoxes = 
     document.getElementById("eitb").checked ? true : false;
+  window.localStorage.enableForContentEditable = 
+    document.getElementById("eice").checked ? true : false;
   window.localStorage.pasteOnMiddleClick = 
     document.getElementById("pomc").checked ? true : false;
-  //---------------------------------------------------------------------
-  // Working around an issue in Chrome 6
-  //---------------------------------------------------------------------
   window.localStorage.copyAsPlainText = 
     document.getElementById("capt").checked ? true : false;
-  //window.localStorage.copyAsPlainText = true;
-  //---------------------------------------------------------------------
   window.localStorage.ctrlToDisable = 
     document.getElementById("dc").checked ? true : false;
   window.localStorage.ctrlToDisableKey = 
     document.getElementById("dck").value;
+  window.localStorage.ctrlState = 
+    document.getElementById("acs").value;
   window.localStorage.altToCopyAsLink = 
     document.getElementById("acal").checked ? true : false;
   window.localStorage.copyAsLink = 
@@ -46,7 +42,6 @@ function saveOptions() {
   var text = document.getElementById("iurltext").value;
   window.localStorage.includeUrlText = 
     (text.length <= 0 || text === " ") ? " " : text;
-    //(text.length <= 0 || text === " ") ? " " : text + " ";
   //---------------------------------------------------------------------
   window.localStorage.includeUrlCommentCountEnabled = 
     document.getElementById("iurlewc").checked ? true : false;
@@ -57,57 +52,79 @@ function saveOptions() {
   } else {
     window.localStorage.includeUrlCommentCount = count;
   }
-
-  //window.close();
 }
   
 function restoreOptions() {
+  opts = {
+    'alertOnCopy'                   : false,
+    'removeSelectionOnCopy'         : false,
+    'enableForTextBoxes'            : true,
+    'enableForContentEditable'      : true,
+    'pasteOnMiddleClick'            : false,
+    'ctrlToDisable'                 : false,
+    'ctrlToDisableKey'              : 'ctrl',
+    'ctrlState'                     : 'disable',
+    'altToCopyAsLink'               : false,
+    'copyAsLink'                    : false,
+    'copyAsPlainText'               : false,
+    'includeUrl'                    : false,
+    'prependUrl'                    : false,
+    'includeUrlText'                : '$crlfCopied from: $title - <$url>',
+    'includeUrlCommentCountEnabled' : false,
+    'includeUrlCommentCount'        : 5,
+    'blackList'                     : blackListToObject()
+  };
+
   if (!window.localStorage) {
     alert("Error local storage is unavailable.");
     window.close();
   }
-  
-  document.getElementById("aoc").checked = 
-    (window.localStorage.alertOnCopy === "true") ? true : false;
-  document.getElementById("rsoc").checked = 
-    (window.localStorage.removeSelectionOnCopy === "true") ? true : false;
-  document.getElementById("eitb").checked = 
-    (window.localStorage.enableForTextBoxes === "true") ? true : false;
-  document.getElementById("pomc").checked = 
-    (window.localStorage.pasteOnMiddleClick === "true") ? true : false;
-  //---------------------------------------------------------------------
-  // Working around an issue in Chrome 6
-  //---------------------------------------------------------------------
-  document.getElementById("capt").checked = 
-    (window.localStorage.copyAsPlainText === "true") ? true : false;
-  //document.getElementById("capt").checked = true;
-  //---------------------------------------------------------------------
-  document.getElementById("dc").checked = 
-    (window.localStorage.ctrlToDisable === "true") ? true : false;
-  document.getElementById("dck").value = 
-    window.localStorage.ctrlToDisableKey || 'ctrl';
-  document.getElementById("acal").checked = 
-    (window.localStorage.altToCopyAsLink === "true") ? true : false;
-  document.getElementById("cal").checked = 
-    (window.localStorage.copyAsLink === "true") ? true : false;
-  document.getElementById("iurl").checked = 
-    (window.localStorage.includeUrl === "true") ? true : false;
-  document.getElementById("iurltext").value = 
-    window.localStorage.includeUrlText || 
-      "$crlfCopied from: $title - <$url>";
-  document.getElementById("iurlewc").checked = 
-    (window.localStorage.includeUrlCommentCountEnabled === "true") ? 
-      true : false;
-  document.getElementById("iurlcount").value = 
-    window.localStorage.includeUrlCommentCount || 5;
 
+  //---------------------------------------------------------------------------
+  // Load options.  This will either populate defaults or pulled saved 
+  // settings from localStorage.
+  //---------------------------------------------------------------------------
+  if (window.localStorage != null) {
+    for (key in opts) {
+      if (window.localStorage.hasOwnProperty(key)) {
+	if (key === 'blackList') {
+	  opts[key] = blackListToObject();
+	} else if (key === 'ctrlToDisableKey' || key === 'ctrlState') {
+	  opts[key] = window.localStorage[key];
+	} else if (key === 'includeUrlCommentCount') {
+          opts[key] = parseInt(window.localStorage[key], 10);
+	} else if (key === 'includeUrlText') {
+	  opts[key] = window.localStorage[key];
+	} else {
+          opts[key] = window.localStorage[key] === "true" ? true : false;
+	}
+      }
+    }
+  }
+  
+  document.getElementById("aoc").checked = opts.alertOnCopy;
+  document.getElementById("rsoc").checked = opts.removeSelectionOnCopy;
+  document.getElementById("eitb").checked = opts.enableForTextBoxes;
+  document.getElementById("eice").checked = opts.enableForContentEditable;
+  document.getElementById("pomc").checked = opts.pasteOnMiddleClick;
+  document.getElementById("capt").checked = opts.copyAsPlainText;
+  document.getElementById("dc").checked = opts.ctrlToDisable;
+  document.getElementById("dck").value = opts.ctrlToDisableKey;
+  document.getElementById("acs").value = opts.ctrlState;
+  document.getElementById("acal").checked = opts.altToCopyAsLink;
+  document.getElementById("cal").checked = opts.copyAsLink;
+  document.getElementById("iurl").checked = opts.includeUrl;
+  document.getElementById("iurltext").value = opts.includeUrlText;
+  document.getElementById("iurlewc").checked = 
+    opts.includeUrlCommentCountEnabled;
+  document.getElementById("iurlcount").value = opts.includeUrlCommentCount;
   if (document.getElementById("iurlewc").checked) {
     document.getElementById("iurlcount").disabled = false;
   } else {
     document.getElementById("iurlcount").disabled = true;
   }
   
-  var v = window.localStorage.prependUrl;
+  var v = opts.prependUrl;
   if (v === undefined || v === "false") {
     document.getElementById("iurlp").checked = false;
     document.getElementById("iurla").checked = true;
@@ -116,10 +133,7 @@ function restoreOptions() {
     document.getElementById("iurla").checked = false;
   }
 
-  if (
-    window.localStorage.includeUrl &&
-    window.localStorage.includeUrl === "true"
-  ) {
+  if (opts.includeUrl) {
     toggleDiv("diviurlap");
   }
 
@@ -272,44 +286,6 @@ function validateCountValue() {
   el.disabled = (enabled.checked) ? false : true;
 }
   
-/*
-function toggleCapt() {
-  var capt = document.getElementById('capt');
-  var iurl = document.getElementById('iurl').checked;
-
-  //---------------------------------------------------------------------
-  // Working around an issue in Chrome 6
-  //---------------------------------------------------------------------
-  capt.checked = true;
-  return;
-  //---------------------------------------------------------------------
-
-  if (iurl) {
-    capt.checked = true;
-  } else {
-    capt.checked = 
-      (window.localStorage.copyAsPlainText === "true") ? true : false;
-  }
-}
-*/
-
-function fixUpIncludeUrl() {
-  var capt    = document.getElementById('capt').checked;
-  var iurl    = document.getElementById('iurl');
-  var iurldiv = document.getElementById('diviurlap');
-
-  if (capt) {
-    iurl.checked = 
-      (window.localStorage.includeUrl === "true") ? true : false;
-    if (iurl.checked) {
-      iurldiv.style.display = 'block';
-    }
-  } else {
-    iurl.checked = false;
-    iurldiv.style.display = 'none';
-  }
-}
-
 function toggleDiv(id) {
   var el = document.getElementById(id);
   
@@ -345,14 +321,11 @@ function handleExclusivity() {
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('iurl').addEventListener('click', function() {
-      toggleDiv('diviurlap'); //toggleCapt();
+      toggleDiv('diviurlap');
     });
     document.getElementById('iurlewc').addEventListener(
       'click', validateCountValue
     );
-    //document.getElementById('capt').addEventListener(
-    //  'click', fixUpIncludeUrl
-    //);
     document.getElementById('cal').addEventListener(
       'click', handleExclusivity
     );

@@ -1,22 +1,10 @@
 var opts = {
-  'init'                          : false,
-  'alertOnCopy'                   : false,
-  'removeSelectionOnCopy'         : false,
-  'enableForTextBoxes'            : true,
-  'pasteOnMiddleClick'            : false,
-  'ctrlToDisable'                 : false,
-  'ctrlToDisableKey'              : 'ctrl',
-  'altToCopyAsLink'               : false,
-  'copyAsLink'                    : false,
-  'copyAsPlainText'               : false,
-  'includeUrl'                    : false,
-  'prependUrl'                    : false,
-  'includeUrlText'                : "",
-  'includeUrlCommentCountEnabled' : false,
-  'includeUrlCommentCount'        : 5,
-  'mouseDownTarget'               : null,
-  'blackList'                     : "",
-  'enableDebug'                   : false
+  'init'            : false,
+  'mouseDownTarget' : null,
+  'mouseStartX'     : 0,
+  'mouseStartY'     : 0,
+  'mouseTravel'     : false,
+  'timerId'         : 0
 };
 
 //-----------------------------------------------------------------------------
@@ -25,50 +13,24 @@ var opts = {
 // background page to get the info.
 //-----------------------------------------------------------------------------
 chrome.extension.sendMessage(
-  { 
-    "type" : "config",
-    "keys" : [
-      "enableForTextBoxes", "pasteOnMiddleClick", "copyAsPlainText", 
-      "ctrlToDisable", "copyAsLink", "includeUrl", "prependUrl", 
-      "includeUrlText", "removeSelectionOnCopy", "altToCopyAsLink",
-      "ctrlToDisableKey", "alertOnCopy",
-      "includeUrlCommentCountEnabled", "includeUrlCommentCount", "blackList"
-    ] 
-  }, 
+  { "type" : "config" },
   function (resp) {
-    debug("Got sendMessage response: " + resp);
+    var key;
     opts.init = true;
-    opts.alertOnCopy = 
-      (resp.alertOnCopy === "true") ? true : false;
-    opts.removeSelectionOnCopy = 
-      (resp.removeSelectionOnCopy === "true") ? true : false;
-    opts.enableForTextBoxes = 
-      (resp.enableForTextBoxes === "true") ? true : false;
-    opts.pasteOnMiddleClick = 
-      (resp.pasteOnMiddleClick === "true") ? true : false;
-    opts.copyAsPlainText = 
-      (resp.copyAsPlainText === "true") ? true : false;
-    opts.ctrlToDisable = 
-      (resp.ctrlToDisable === "true") ? true : false;
-    opts.altToCopyAsLink = 
-      (resp.altToCopyAsLink === "true") ? true : false;
-    opts.ctrlToDisableKey = resp.ctrlToDisableKey || 'ctrl';
-    opts.copyAsLink = 
-      (resp.copyAsLink === "true") ? true : false;
-    opts.includeUrl = (resp.includeUrl === "true") ? true : false;
-    opts.prependUrl = (resp.prependUrl === "true") ? true : false;
-    opts.includeUrlCommentCountEnabled = 
-      (resp.includeUrlCommentCountEnabled === "true") ? true : false;
-    opts.includeUrlCommentCount =
-      (isNaN(resp.includeUrlCommentCount)) ? 5 : resp.includeUrlCommentCount;
-    opts.includeUrlText =
-      (resp.includeUrlText === " ") ? "" : resp.includeUrlText;
-    opts.blackList = resp.blackList;
+
+    for (key in resp) {
+      if (resp.hasOwnProperty(key)) {
+        opts[key] = resp[key];
+      }
+    }
+
+    debug("Got opts:");
+    debug(opts, true);
 
     var i;
     debug("Walk blacklist");
     for (i in opts.blackList) {
-      debug("  blacklist entry: "+i+" -> "+opts.blackList[i]);
+      debug("  blacklist entry: " + i + " -> " + opts.blackList[i]);
     }
 
     var href = window.location.href;
@@ -76,7 +38,7 @@ chrome.extension.sendMessage(
     if (arr.length <= 0) {
       debug("window.location.hostname is empty");
       return;
-    } 
+    }
 
     debug("window.location.href is " + href);
 
@@ -107,26 +69,31 @@ chrome.extension.sendMessage(
 
     if (!flag) {
       debug("Extension enabled for " + domain);
-      document.body.addEventListener("mouseup", autoCopy, false);
+      document.body.addEventListener("mouseup", autoCopyW, false);
 
-      if (!opts.enableForTextBoxes) {
-        document.body.addEventListener(
-          "mousedown", 
-          function (e) {
-            opts.mouseDownTarget = e.target;
-          },
-          false
-        );
-      }
+      document.body.addEventListener(
+        "mousedown",
+        function (e) {
+          //debug("StartX = " + e.x + " -- StartY = " + e.y);
+          opts.mouseStartX = e.x;
+          opts.mouseStartY = e.y;
+          opts.mouseDownTarget = e.target;
+        },
+        false
+      );
     } else {
       debug("URL is blacklisted, disabling: " + domain);
     }
   }
 );
 
-function debug(text) {
+function debug(text, standalone) {
   if (opts.enableDebug) {
-    console.debug("Auto-Copy (debug): " + text);
+    if (!standalone) {
+      console.debug("Auto-Copy (debug): " + text);
+    } else {
+      console.debug(text);
+    }
   }
 }
 
@@ -154,7 +121,7 @@ function alertOnCopy() {
     el.style.boxSizing       = 'content-box';
     el.style.height          = '12px';
     el.style.width           = '70px';
-    el.style.bottom          = '5px'
+    el.style.bottom          = '5px';
     el.style.right           = '5px';
     el.style.textAlign       = 'center';
     el.style.fontFamily      = 'Helvetica, sans-serif';
@@ -186,7 +153,9 @@ function includeComment(params) {
 
   var text;
   var count   = (params.text.split(/\s+/)).length;
-  var comment = '', flag = true, url = '';
+  var comment = '';
+  var flag    = true;
+  var url     = '';
   var crlf    = (opts.copyAsPlainText) ? "\n" : "<br>";
 
   if (
@@ -195,7 +164,7 @@ function includeComment(params) {
   ) {
     debug("Setting comment flag to false");
     flag = false;
-  } 
+  }
 
   if (opts.includeUrl && opts.includeUrlText && flag) {
     comment = opts.includeUrlText;
@@ -241,7 +210,8 @@ function includeComment(params) {
 }
 
 function copyAsPlainText() {
-  var s, text; 
+  var s;
+  var text;
   try {
     s = window.getSelection();
     text = s.toString();
@@ -263,10 +233,70 @@ function copyAsPlainText() {
     debug("Sending copy as plain text: " + text);
     chrome.extension.sendMessage({
       "type" : "reformat",
-      "text" : text,
+      "text" : text
     });
   } catch (ex) {
     debug("Caught exception: " + ex);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// We using a combination of mouse travel and click count to decide how to
+// handle the clicks.  If not mouse travel and a single click then we will not
+// do anything.  If no mouse travel and move than one click means someone could
+// be double or triple clicking to make a selection so we'll set a delay in
+// case they are triple clicking.  This is to prevent autoCopy from firing
+// multiple times (for the double click and then again for the triple click).
+//
+// If we detect mouse travel and it is a single click then we will call
+// autoCopy immediately as that should be an indicaton of a selection being
+// made.
+//-----------------------------------------------------------------------------
+function autoCopyW(e) {
+  var x;
+  var y;
+  debug(
+    "Mouse coords: " + e.x + " - " + e.y + " - " + opts.mouseStartX + " - " +
+      opts.mouseStartY
+  );
+  if (opts.mouseStartX && opts.mouseStartY) {
+    x = Math.abs(e.x - opts.mouseStartX);
+    y = Math.abs(e.y - opts.mouseStartY);
+    opts.mouseTravel = false;
+    opts.mouseStartX = 0;
+    opts.mouseStartY = 0;
+    if (x > 3 || y > 3) {
+      debug("Detected mouse drag");
+      opts.mouseTravel = true;
+    }
+  }
+
+  if (opts.mouseTravel && e.detail === 1) {
+    debug("calling autoCopy immediately");
+    autoCopy(e);
+  } else if (!opts.mouseTravel && e.detail === 1) {
+    debug("ignoring click.  No mouse travel and click count is one.");
+    return;
+  }
+
+  if (!opts.mouseTravel && e.detail >= 2) {
+    if (!opts.timerId) {
+      debug(
+        "Setting timer to call autoCopy -- need to wait and see if there " +
+        "are more clicks."
+      );
+      opts.timerId = setTimeout(function () {
+        opts.timerId = 0;
+        autoCopy(e);
+      }, 500);
+    } else {
+      debug("Got anohter click reseting timer");
+      clearTimeout(opts.timerId);
+      opts.timerId = setTimeout(function () {
+        opts.timerId = 0;
+        autoCopy(e);
+      }, 500);
+    }
   }
 }
 
@@ -277,31 +307,71 @@ function copyAsPlainText() {
 // field element was involved in the selection.  In order to work around this
 // the mousedown target is used to determine if a text field is involved.
 //
-// It is only important if the user wants to exclude selections from text 
+// It is only important if the user wants to exclude selections from text
 // fields
 //
 // The if is always evaluating to false because the message passing hasn't
 // occurred by the time this code segment is executed.  I'm leaving it in
-// as a placeholder in case localStorage gets initialized directly for content 
+// as a placeholder in case localStorage gets initialized directly for content
 // pages.
 //-----------------------------------------------------------------------------
 function autoCopy(e) {
-  var rv, el, s, text;
+  var rv;
+  var el;
+  var s;
+  var text;
+  var nodeTypes       = { 'input' : false, 'editable' : false };
+  var inputElement    = false;
+  var editableElement = false;
 
-  debug("Detected a mouse event");
+  if (
+    opts.mouseDownTarget &&
+    opts.mouseDownTarget.nodeName &&
+    (opts.mouseDownTarget.nodeName === "INPUT" ||
+    opts.mouseDownTarget.nodeName === "TEXTAREA")
+  ) {
+    debug("Mouse down on input element");
+    inputElement = true;
+  }
+
+  if (opts.mouseDownTarget && opts.mouseDownTarget.contentEditable === "true") {
+    debug("Mouse down on content editable element");
+    editableElement = true;
+  }
+
   if (opts.enableDebug) {
-    console.debug(opts);
+    console.debug(opts, true);
+  }
+
+  debug("Click count: " + e.detail);
+  /* This can be used because we will no longer detect double and triple
+   * clicked selections :(
+  if (!opts.mouseTravel) {
+    debug("No mouse movement, ignoring click");
+    return;
+  }
+  */
+
+  if (
+    opts.ctrlToDisable
+    && opts.ctrlState === 'enable'
+    && ((opts.ctrlToDisableKey === 'ctrl' && !e.ctrlKey)
+      || (opts.ctrlToDisableKey === 'shift' && !e.shiftKey))
+  ) {
+    debug("Ctrl/shift was not active, ignoring click");
+    return;
   }
 
   if (
-    opts.ctrlToDisable 
+    opts.ctrlToDisable
+    && opts.ctrlState === 'disable'
     && ((opts.ctrlToDisableKey === 'ctrl' && e.ctrlKey)
       || (opts.ctrlToDisableKey === 'shift' && e.shiftKey))
   ) {
-    debug("Ctrl/shift was active disabling");
+    debug("Ctrl/shift was active, ignoring click");
     return;
   }
-  
+
   if (opts.pasteOnMiddleClick && e.button === 1) {
     el = e.target;
     debug("autoCopy: detected paste on middle click");
@@ -309,7 +379,7 @@ function autoCopy(e) {
     if (
       ((e.target.nodeName === "INPUT"
         || e.target.nodeName === "TEXTAREA")
-      && e.target.type !== "checkbox" 
+      && e.target.type !== "checkbox"
       && e.target.type !== "radio"
       && !e.target.disabled
       && !e.target.readOnly)
@@ -327,21 +397,24 @@ function autoCopy(e) {
           chrome.extension.sendMessage(
             {
               "type" : "paste",
-              "text" : text,
+              "text" : text
             },
             function(text) {
-              var p1, p2, start, end;
-    
+              var p1;
+              var p2;
+              var start;
+              var end;
+
               if (
-                (e.target.nodeName === "INPUT"
-                  || e.target.nodeName === "TEXTAREA")
+                e.target.nodeName === "INPUT"
+                  || e.target.nodeName === "TEXTAREA"
               ) {
                 p1 = el.value.substring(0,el.selectionStart);
                 p2 = el.value.substring(el.selectionEnd);
-    
+
                 el.value = p1 + text + p2;
               } else if (e.target.contentEditable === "true") {
-		el.innerHTML = el.innerHTML + text;
+                el.innerHTML = el.innerHTML + text;
               }
             }
           );
@@ -357,43 +430,70 @@ function autoCopy(e) {
     return;
   }
 
+  /*
+  if (
+    (!opts.enableForContentEditable &&
+    opts.mouseDownTarget &&
+    opts.mouseDownTarget.contentEditable === "true")
+  ) {
+  */
+  if (!opts.enableForContentEditable && editableElement) {
+    debug("Extension is not enabled for content editable elements");
+    return;
+  }
+
+  /*
   if (
     !opts.enableForTextBoxes &&
     opts.mouseDownTarget &&
     opts.mouseDownTarget.nodeName &&
     (opts.mouseDownTarget.nodeName === "INPUT" ||
-    opts.mouseDownTarget.nodeName === "TEXTAREA") 
-  ){
+    opts.mouseDownTarget.nodeName === "TEXTAREA")
+  ) {
+  */
+  if (!opts.enableForTextBoxes && inputElement) {
     debug("Extension is not enabled for text boxes");
     return;
   }
 
-  s = window.getSelection();
+  s    = window.getSelection();
+  debug("selection collapsed? " + s.isCollapsed);
   text = s.toString();
-  if (text.length <= 0) {
-    debug("No selection");
+  debug("selection collapsed? " + s.isCollapsed + " - length: " + text.length);
+  if (!inputElement && s.isCollapsed) {
+    debug("No selection, ignoring click");
+    return;
+  } else if (inputElement && text.length <= 0) {
+    //-------------------------------------------------------------------------
+    // Chrome is showing collapsed when an input element has selected text.
+    //-------------------------------------------------------------------------
+    debug("(input element) No selection, ignoring click");
     return;
   }
-    
+
   try {
     if (opts.copyAsLink || (opts.altToCopyAsLink && e.altKey)) {
       debug("performing copy as link");
       chrome.extension.sendMessage({
         "type"  : "asLink",
         "text"  : text,
-	"href"  : window.location.href,
-	"title" : document.title
+        "href"  : window.location.href,
+        "title" : document.title
       });
     } else if (opts.copyAsPlainText) {
       debug("performing copy as plain text");
       copyAsPlainText();
     } else if (opts.includeUrl) {
       debug("performing copy with comment");
+      //-----------------------------------------------------------------------
+      // This is needed to clear the clipboard contents. Otherwise, we'll keep
+      // adding to what's on the clipboard in background.js
+      //-----------------------------------------------------------------------
       rv = document.execCommand("copy");
       if (rv) {
         text = includeComment({
           'text'  : text,
-          'merge' : false,
+          'merge' : false
         });
         debug("Got comment: " + text);
         chrome.extension.sendMessage({
@@ -402,20 +502,24 @@ function autoCopy(e) {
           "opts"    : opts
         });
       } else {
-	debug("Falling back to plain text copy");
-	opts.copyAsPlainText = true;
-	copyAsPlainText();
-	opts.copyAsPlainText = false;
+        debug("Falling back to plain text copy");
+        opts.copyAsPlainText = true;
+        copyAsPlainText();
+        opts.copyAsPlainText = false;
       }
     } else {
       debug("executing copy");
+      //-----------------------------------------------------------------------
+      // This is needed to clear the clipboard contents. Otherwise, we'll keep
+      // adding to what's on the clipboard in background.js
+      //-----------------------------------------------------------------------
       rv = document.execCommand("copy");
       debug("copied: " + rv);
       if (!rv) {
-	debug("Falling back to plain text copy");
-	opts.copyAsPlainText = true;
-	copyAsPlainText();
-	opts.copyAsPlainText = false;
+        debug("Falling back to plain text copy");
+        opts.copyAsPlainText = true;
+        copyAsPlainText();
+        opts.copyAsPlainText = false;
       }
     }
     alertOnCopy();

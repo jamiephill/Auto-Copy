@@ -1,20 +1,56 @@
 chrome.extension.onMessage.addListener(
   function (req, sender, callback) {
-    var rv, el, i, len, range, s, resp = {};
+    var rv, el, text, resp = {}, opts = {}, key;
     if (req.type === "config") {
-      if (window.localStorage != null && req.keys != null) {
-        len = req.keys.length;
-        for (i=0; i<len; i++) {
-          if (req.keys[i] === "blackList") {
-            resp[req.keys[i]] = blackListToObject();
-          } else {
-            resp[req.keys[i]] = 
-              window.localStorage[req.keys[i]] || undefined;
-          }
-        }
+      opts = {
+        'alertOnCopy'                   : false,
+        'removeSelectionOnCopy'         : false,
+        'enableForTextBoxes'            : true,
+        'enableForContentEditable'      : true,
+        'pasteOnMiddleClick'            : false,
+        'ctrlToDisable'                 : false,
+        'ctrlToDisableKey'              : 'ctrl',
+        'ctrlState'                     : 'disable',
+        'altToCopyAsLink'               : false,
+        'copyAsLink'                    : false,
+        'copyAsPlainText'               : false,
+        'includeUrl'                    : false,
+        'prependUrl'                    : false,
+        'includeUrlText'                : '$crlfCopied from: $title - <$url>',
+        'includeUrlCommentCountEnabled' : false,
+        'includeUrlCommentCount'        : 5,
+        'blackList'                     : blackListToObject(),
+        'enableDebug'                   : true
+      };
+
+      if (window.localStorage != null) {
+	for (key in opts) {
+	  if (opts.hasOwnProperty(key)) {
+	    if (key === 'blackList') {
+              resp[key] = blackListToObject();
+	    } else if (key === 'ctrlToDisableKey' || key === 'ctrlState') {
+              resp[key] = window.localStorage[key] || opts[key];
+	    } else if (key === 'includeUrlCommentCount') {
+	      if (window.localStorage.hasOwnProperty(key)) {
+		resp[key] = parseInt(window.localStorage[key], 10);
+	      } else {
+		resp[key] = opts[key];
+	      }
+	    } else if (key === 'includeUrlText') {
+	      resp[key] = window.localStorage[key] || opts[key];
+	    } else {
+	      if (window.localStorage.hasOwnProperty(key)) {
+                resp[key] = window.localStorage[key] === "true" ? true : false;
+	      } else {
+                resp[key] = opts[key];
+	      }
+	    }
+	  }
+	}
+
         callback(resp);
       } else {
-        callback({});
+        callback(opts);
       }
     } else if (req.type === "includeComment") {
         el = document.createElement('div');
