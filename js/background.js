@@ -20,7 +20,7 @@ chrome.extension.onMessage.addListener(
         'includeUrlCommentCountEnabled' : false,
         'includeUrlCommentCount'        : 5,
         'blackList'                     : blackListToObject(),
-        'enableDebug'                   : true
+        'enableDebug'                   : false
       };
 
       if (window.localStorage != null) {

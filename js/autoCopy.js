@@ -33,37 +33,47 @@ chrome.extension.sendMessage(
       debug("  blacklist entry: " + i + " -> " + opts.blackList[i]);
     }
 
-    var href = window.location.href;
-    var arr  = window.location.hostname.split(".");
-    if (arr.length <= 0) {
-      debug("window.location.hostname is empty");
-      return;
-    }
-
-    debug("window.location.href is " + href);
-
+    var arr;
     var domain;
+    var href = window.location.href;
     var flag = false;
-    if (opts.blackList[encodeURIComponent(href)]) {
-      domain = href;
-      flag   = true;
+    debug("window.location.href is " + href);
+    if (window.location.protocol === "file:") {
+      domain = window.location.pathname.match(/^\/([^\/]+)\//)[1];
+      if (
+        opts.blackList[encodeURIComponent(href)] ||
+        opts.blackList[encodeURIComponent(domain)]
+      ) {
+        flag = true;
+      }
     } else {
-      for (i in arr) {
-        if (arr.length < 2) {
-          break;
+      arr  = window.location.hostname.split(".");
+      if (arr.length <= 0) {
+        debug("window.location.hostname is empty");
+        return;
+      }
+
+      if (opts.blackList[encodeURIComponent(href)]) {
+        domain = href;
+        flag   = true;
+      } else {
+        for (i in arr) {
+          if (arr.length < 2) {
+            break;
+          }
+          domain = arr.join(".");
+          debug("Domain walk: " + domain);
+          if (opts.blackList[domain] == 1) {
+            flag = true;
+            break;
+          }
+          arr.shift();
         }
-        domain = arr.join(".");
-        debug("Domain walk: " + domain);
-        if (opts.blackList[domain] == 1) {
-          flag = true;
-          break;
-        }
-        arr.shift();
       }
     }
 
     if (!domain) {
-      debug("Domain is undefined: " + window.location.hostname);
+      debug("Domain is undefined: " + window.location.href);
       return;
     }
 

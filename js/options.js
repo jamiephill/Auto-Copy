@@ -192,41 +192,59 @@ function addToBlackList() {
   addErrorEl.style.display = "none";
 
   if (selectionD) {
-    if (!domain.match(/\./)) {
-      addErrorEl.innerText = "Error: speficied domain is invalid";
-      addErrorEl.style.display = "block";
-      return;
-    }
+    if (domain.match(/^file:/)) {
+      domain = domain.match(/^file:\/\/\/([^\/]+)/)[1];
+      encodedDomain = encodeURIComponent(domain);
+      if (!domain) {
+        addErrorEl.innerText = "Error: speficied domain is invalid";
+        addErrorEl.style.display = "block";
+        return;
+      }
+    } else {
+      if (!domain.match(/\./)) {
+        addErrorEl.innerText = "Error: speficied domain is invalid";
+        addErrorEl.style.display = "block";
+        return;
+      }
 
-    domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
-    encodedDomain = encodeURIComponent(domain);
+      domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+      encodedDomain = encodeURIComponent(domain);
 
-    if (blackList[encodedDomain]) {
-      addErrorEl.innerText = 
-        "Error: speficied domain is already in the list";
-      addErrorEl.style.display = "block";
-      return;
-    }
+      if (blackList[encodedDomain]) {
+        addErrorEl.innerText = 
+          "Error: speficied domain is already in the list";
+        addErrorEl.style.display = "block";
+        return;
+      }
+    } 
   } else {
-    if (!domain.match(/\./) && !domain.match(/\//)) {
-      addErrorEl.innerText = "Error: speficied page is invalid";
-      addErrorEl.style.display = "block";
-      return;
-    }
+    if (domain.match(/^file:/)) {
+      encodedDomain = encodeURIComponent(domain);
+      if (blackList[encodedDomain]) {
+        addErrorEl.innerText = "Error: speficied page is already in the list";
+        addErrorEl.style.display = "block";
+        return;
+      }
+    } else {
+      if (!domain.match(/\./) && !domain.match(/\//)) {
+        addErrorEl.innerText = "Error: speficied page is invalid";
+        addErrorEl.style.display = "block";
+        return;
+      }
 
-    parsedDomain  = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
-    encodedDomain = encodeURIComponent(domain);
+      parsedDomain  = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
+      encodedDomain = encodeURIComponent(domain);
 
-    if (blackList[parsedDomain]) {
-      addErrorEl.innerText = 
-        "Error: speficied page's domain is already in the list";
-      addErrorEl.style.display = "block";
-      return;
-    } else if (blackList[encodedDomain]) {
-      addErrorEl.innerText = 
-        "Error: speficied page is already in the list";
-      addErrorEl.style.display = "block";
-      return;
+      if (blackList[parsedDomain]) {
+        addErrorEl.innerText = 
+          "Error: speficied page's domain is already in the list";
+        addErrorEl.style.display = "block";
+        return;
+      } else if (blackList[encodedDomain]) {
+        addErrorEl.innerText = "Error: speficied page is already in the list";
+        addErrorEl.style.display = "block";
+        return;
+      }
     }
   }
 
