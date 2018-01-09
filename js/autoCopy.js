@@ -122,34 +122,37 @@ function fade(el, speed) {
   speed);
 }
 
-function alertOnCopy() {
+function alertOnCopy(e) {
   var el;
+  debug("E.x = " + e.x + " - " + e.y);
   if (opts.alertOnCopy) {
     el = document.createElement('div');
     el.innerHTML             = "Auto Copied";
     el.style.position        = 'fixed';
     el.style.boxSizing       = 'content-box';
-    el.style.height          = '12px';
-    el.style.width           = '70px';
-    el.style.bottom          = '5px';
-    el.style.right           = '5px';
+    el.style.height          = '30px';
+    el.style.lineHeight      = '30px';
+    el.style.width           = '125px';
+    el.style.fontSize        = '16px';
+    el.style.bottom          = '40px';
+    el.style.right           = '40px';
     el.style.textAlign       = 'center';
     el.style.fontFamily      = 'Helvetica, sans-serif';
     el.style.fontStyle       = 'normal';
     el.style.fontWeight      = 'normal';
-    el.style.fontSize        = '12px';
     el.style.backgroundColor = '#FFFF5C';
     el.style.padding         = '4px';
     el.style.margin          = '0px';
-    el.style.lineHeight      = '12px';
     el.style.borderRadius    = '4px';
     el.style.boxShadow       = '0px 0px 7px 0px #818181';
+    el.style.boxShadow       = '0px 0px 16px 0px #CBCBCB';
     el.style.border          = '1px solid #FAD42E';
+    el.style.border          = '1px solid #D9D900';
     el.style.zIndex          = '100000001';
     document.body.appendChild(el);
     setTimeout(function () {
       fade(el, 5);
-    }, 400);
+    }, 1250);
   }
 }
 
@@ -265,6 +268,7 @@ function copyAsPlainText() {
 function autoCopyW(e) {
   var x;
   var y;
+  opts.mouseTravel = false;
   debug(
     "Mouse coords: " + e.x + " - " + e.y + " - " + opts.mouseStartX + " - " +
       opts.mouseStartY
@@ -272,7 +276,6 @@ function autoCopyW(e) {
   if (opts.mouseStartX && opts.mouseStartY) {
     x = Math.abs(e.x - opts.mouseStartX);
     y = Math.abs(e.y - opts.mouseStartY);
-    opts.mouseTravel = false;
     opts.mouseStartX = 0;
     opts.mouseStartY = 0;
     if (x > 3 || y > 3) {
@@ -281,15 +284,16 @@ function autoCopyW(e) {
     }
   }
 
-  if (opts.mouseTravel && e.detail === 1) {
+  if (opts.pasteOnMiddleClick && e.button === 1) {
+    debug("paste requested, calling autoCopy immediately");
+    autoCopy(e);
+  } else if (opts.mouseTravel && e.detail === 1) {
     debug("calling autoCopy immediately");
     autoCopy(e);
   } else if (!opts.mouseTravel && e.detail === 1) {
     debug("ignoring click.  No mouse travel and click count is one.");
     return;
-  }
-
-  if (!opts.mouseTravel && e.detail >= 2) {
+  } else if (!opts.mouseTravel && e.detail >= 2) {
     if (!opts.timerId) {
       debug(
         "Setting timer to call autoCopy -- need to wait and see if there " +
@@ -532,7 +536,7 @@ function autoCopy(e) {
         opts.copyAsPlainText = false;
       }
     }
-    alertOnCopy();
+    alertOnCopy(e);
   } catch (ex) {
     debug("Caught exception: " + ex);
   }
