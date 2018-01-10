@@ -3,7 +3,6 @@ var opts = {
   'mouseDownTarget' : null,
   'mouseStartX'     : 0,
   'mouseStartY'     : 0,
-  'mouseTravel'     : false,
   'timerId'         : 0
 };
 
@@ -140,6 +139,7 @@ function alertOnCopy(e) {
     el.style.fontFamily      = 'Helvetica, sans-serif';
     el.style.fontStyle       = 'normal';
     el.style.fontWeight      = 'normal';
+    el.style.color           = '#767676';
     el.style.backgroundColor = '#FFFF5C';
     el.style.padding         = '4px';
     el.style.margin          = '0px';
@@ -268,7 +268,7 @@ function copyAsPlainText() {
 function autoCopyW(e) {
   var x;
   var y;
-  opts.mouseTravel = false;
+  var mouseTravel = false;
   debug(
     "Mouse coords: " + e.x + " - " + e.y + " - " + opts.mouseStartX + " - " +
       opts.mouseStartY
@@ -280,20 +280,23 @@ function autoCopyW(e) {
     opts.mouseStartY = 0;
     if (x > 3 || y > 3) {
       debug("Detected mouse drag");
-      opts.mouseTravel = true;
+      mouseTravel = true;
     }
   }
 
   if (opts.pasteOnMiddleClick && e.button === 1) {
     debug("paste requested, calling autoCopy immediately");
     autoCopy(e);
-  } else if (opts.mouseTravel && e.detail === 1) {
+  } else if (mouseTravel && e.detail === 1) {
     debug("calling autoCopy immediately");
     autoCopy(e);
-  } else if (!opts.mouseTravel && e.detail === 1) {
+  } else if (!mouseTravel && e.detail === 1) {
     debug("ignoring click.  No mouse travel and click count is one.");
     return;
-  } else if (!opts.mouseTravel && e.detail >= 2) {
+  } else if (mouseTravel && e.detail >= 2) {
+    debug("double click and drag -- calling autoCopy immediately");
+    autoCopy(e);
+  } else if (!mouseTravel && e.detail >= 2) {
     if (!opts.timerId) {
       debug(
         "Setting timer to call autoCopy -- need to wait and see if there " +
@@ -358,13 +361,6 @@ function autoCopy(e) {
   }
 
   debug("Click count: " + e.detail);
-  /* This can be used because we will no longer detect double and triple
-   * clicked selections :(
-  if (!opts.mouseTravel) {
-    debug("No mouse movement, ignoring click");
-    return;
-  }
-  */
 
   if (
     opts.ctrlToDisable
