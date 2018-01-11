@@ -9,6 +9,18 @@ function saveOptions() {
 
   window.localStorage.alertOnCopy = 
     document.getElementById("aoc").checked ? true : false;
+  window.localStorage.alertOnCopySize = 
+    document.getElementById("aocs").style.fontSize;
+
+  window.localStorage.alertOnCopyDuration = 
+    document.getElementById("aocd").value;
+  var els = document.getElementsByName("aocLocation");
+  var i=0;
+  for (i=0; i<els.length; i++) {
+    if (els[i].checked) {
+      window.localStorage.alertOnCopyLocation = els[i].value;
+    }
+  }
   window.localStorage.removeSelectionOnCopy = 
     document.getElementById("rsoc").checked ? true : false;
   window.localStorage.enableForTextBoxes = 
@@ -57,6 +69,9 @@ function saveOptions() {
 function restoreOptions() {
   opts = {
     'alertOnCopy'                   : false,
+    'alertOnCopySize'               : '14px',
+    'alertOnCopyDuration'           : .75,
+    'alertOnCopyLocation'           : 'bottomRight',
     'removeSelectionOnCopy'         : false,
     'enableForTextBoxes'            : true,
     'enableForContentEditable'      : true,
@@ -89,6 +104,11 @@ function restoreOptions() {
       if (window.localStorage.hasOwnProperty(key)) {
 	if (key === 'blackList') {
 	  opts[key] = blackListToObject();
+	} else if (
+          key === 'alertOnCopySize' || key === 'alertOnCopyDuration' ||
+          key === 'alertOnCopyLocation'
+        ) {
+	  opts[key] = window.localStorage[key];
 	} else if (key === 'ctrlToDisableKey' || key === 'ctrlState') {
 	  opts[key] = window.localStorage[key];
 	} else if (key === 'includeUrlCommentCount') {
@@ -103,6 +123,17 @@ function restoreOptions() {
   }
   
   document.getElementById("aoc").checked = opts.alertOnCopy;
+  document.getElementById("aocs").style.fontSize = opts.alertOnCopySize;
+  document.getElementById("aocd").value = opts.alertOnCopyDuration;
+  if (opts.alertOnCopyLocation === "topLeft") {
+    document.getElementById("aocltl").checked = true;
+  } else if (opts.alertOnCopyLocation === "topRight") {
+    document.getElementById("aocltr").checked = true;
+  } else if (opts.alertOnCopyLocation === "bottomLeft") {
+    document.getElementById("aoclbl").checked = true;
+  } else if (opts.alertOnCopyLocation === "bottomRight") {
+    document.getElementById("aoclbr").checked = true;
+  }
   document.getElementById("rsoc").checked = opts.removeSelectionOnCopy;
   document.getElementById("eitb").checked = opts.enableForTextBoxes;
   document.getElementById("eice").checked = opts.enableForContentEditable;
@@ -135,6 +166,10 @@ function restoreOptions() {
 
   if (opts.includeUrl) {
     toggleDiv("diviurlap");
+  }
+
+  if (opts.alertOnCopy) {
+    toggleDiv("aocSettings");
   }
 
   blackListToObject();
@@ -338,6 +373,32 @@ function handleExclusivity() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('smaller').addEventListener('click', function() {
+      var el = document.getElementById('aocs');
+      var fs = el.style.fontSize;
+        //window.getComputedStyle(el, null).getPropertyValue('font-size');
+      fs = parseFloat(fs);
+      fs = fs - 1;
+      el.style.fontSize = fs + 'px';
+      window.localStorage.alertOnCopySize = fs + 'px';
+    });
+    document.getElementById('bigger').addEventListener('click', function() {
+      var el = document.getElementById('aocs');
+      var fs = el.style.fontSize 
+      fs = parseFloat(fs);
+      fs = fs + 1;
+      el.style.fontSize = fs + 'px';
+      window.localStorage.alertOnCopySize = fs + 'px';
+    });
+    document.getElementById('aocd').addEventListener('blur', function () {
+      if (isNaN(document.getElementById("aocd").value)) {
+        document.getElementById("aocd").value = .75;
+        window.localStorage.alertOnCopyDuration = .75;
+      }
+    });
+    document.getElementById('aoc').addEventListener('click', function() {
+      toggleDiv('aocSettings');
+    });
     document.getElementById('iurl').addEventListener('click', function() {
       toggleDiv('diviurlap');
     });
@@ -395,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (els[i].nodeName === "SELECT") {
           els[i].addEventListener('change', saveOptions);
       } else {
-        if (els[i].type === "text") {
+        if (els[i].type === "text" || els[i].type === "tel") {
           els[i].addEventListener('keyup', saveOptions);
         } else {
           els[i].addEventListener('click', saveOptions);

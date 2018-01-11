@@ -3,6 +3,80 @@ body {
   font-size: 16px;
 }
 
+div#aocSettings {
+  user-select: none;
+  display: none;
+}
+
+div#aocSettings div:nth-of-type(3) {
+  margin-top: 7px;
+}
+
+div#aocSettings div:nth-of-type(1) span.label {
+  margin-right: 36px;
+}
+
+div#aocSettings div:nth-of-type(2) span.label {
+  margin-right: 4px;
+}
+
+div#aocSettings div:nth-of-type(3) span.label {
+  margin-right: 0;
+  position: relative;
+  top: -3px;
+}
+
+input#aocd {
+  width: 4em;
+}
+
+div.aocLocation label {
+  position: relative;
+  top: -2px;
+  margin-right: 8px;
+}
+
+
+div#aocs {
+  font-size: 14px;
+  font-family: Helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  box-shadow: rgb(203, 203, 203) 0px 0px 16px 0px;
+  border: 1px solid rgb(217, 217, 0);
+  z-index: 100000001;
+  text-align: center;
+  color: rgb(118, 118, 118);
+  background-color: rgb(255, 255, 92);
+  /*
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  */
+  width: 7em;
+  height: 2em;
+  line-height: 2em;
+  border-radius: 0.25em;
+  box-sizing: content-box;
+  /* padding: 0.25em; */
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+
+span#smaller, span#bigger {
+  color: #767676;
+  font-size: 24px;
+  cursor: pointer;
+  position: relative;
+  top: 4px;
+  margin: 0 8px 0 0;
+}
+
+span#smaller {
+  margin: 0 16px 0 0;
+}
+
 input[type=checkbox], input[type=radio] {
   width: 16px;
   height: 16px;

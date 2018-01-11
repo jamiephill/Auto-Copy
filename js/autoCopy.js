@@ -122,37 +122,59 @@ function fade(el, speed) {
 }
 
 function alertOnCopy(e) {
-  var el;
-  debug("E.x = " + e.x + " - " + e.y);
+  var el, el1;
+
   if (opts.alertOnCopy) {
     el = document.createElement('div');
-    el.innerHTML             = "Auto Copied";
-    el.style.position        = 'fixed';
-    el.style.boxSizing       = 'content-box';
-    el.style.height          = '30px';
-    el.style.lineHeight      = '30px';
-    el.style.width           = '125px';
-    el.style.fontSize        = '16px';
-    el.style.bottom          = '40px';
-    el.style.right           = '40px';
-    el.style.textAlign       = 'center';
+    el.style.fontSize        = opts.alertOnCopySize;
     el.style.fontFamily      = 'Helvetica, sans-serif';
     el.style.fontStyle       = 'normal';
     el.style.fontWeight      = 'normal';
-    el.style.color           = '#767676';
-    el.style.backgroundColor = '#FFFF5C';
-    el.style.padding         = '4px';
-    el.style.margin          = '0px';
-    el.style.borderRadius    = '4px';
     el.style.boxShadow       = '0px 0px 7px 0px #818181';
     el.style.boxShadow       = '0px 0px 16px 0px #CBCBCB';
     el.style.border          = '1px solid #FAD42E';
     el.style.border          = '1px solid #D9D900';
     el.style.zIndex          = '100000001';
+    el.style.textAlign       = 'center';
+    el.style.color           = '#767676';
+    el.style.backgroundColor = '#FFFF5C';
+    el.style.position        = 'fixed';
+    el.style.borderRadius    = '.25em';
+    el.innerHTML             = "Auto Copied";
+    el.style.boxSizing       = 'content-box';
+    el.style.height          = '2em';
+    el.style.lineHeight      = '2em';
+    el.style.width           = '7em';
+    el.style.padding         = '0px';
+    el.style.margin          = '0px';
+
+    debug("location: " + opts.alertOnCopyLocation);
+    if (opts.alertOnCopyLocation === 'topLeft') {
+      el.style.top = '25px';
+      el.style.left  = '25px';
+    } else if (opts.alertOnCopyLocation === 'topRight') {
+      el.style.top   = '25px';
+      el.style.right = '25px';
+    } else if (opts.alertOnCopyLocation === 'bottomLeft') {
+      el.style.bottom = '25px';
+      el.style.left   = '25px';
+    } else {
+      el.style.bottom = '25px';
+      el.style.right  = '25px';
+    }
+
     document.body.appendChild(el);
+
+    var duration = parseFloat(opts.alertOnCopyDuration) * 1000;
+    if (isNaN(duration)) {
+      duration = 750;
+    }
+
+    debug("Fade duration: " + duration);
+
     setTimeout(function () {
       fade(el, 5);
-    }, 1250);
+    }, duration);
   }
 }
 
@@ -284,6 +306,8 @@ function autoCopyW(e) {
     }
   }
 
+  debug("Click count: " + e.detail);
+
   if (opts.pasteOnMiddleClick && e.button === 1) {
     debug("paste requested, calling autoCopy immediately");
     autoCopy(e);
@@ -296,19 +320,20 @@ function autoCopyW(e) {
   } else if (mouseTravel && e.detail >= 2) {
     debug("double click and drag -- calling autoCopy immediately");
     autoCopy(e);
-  } else if (!mouseTravel && e.detail >= 2) {
+  } else if (!mouseTravel && e.detail >= 3) {
+    debug("triple click detected -- calling autoCopy immediately");
+    clearTimeout(opts.timerId);
+    autoCopy(e);
+  } else if (!mouseTravel && e.detail == 2) {
+    //-------------------------------------------------------------------------
+    // We have to wait before calling auto copy when two clicks are 
+    // detected to see if there is going to be a triple click.
+    //-------------------------------------------------------------------------
     if (!opts.timerId) {
       debug(
         "Setting timer to call autoCopy -- need to wait and see if there " +
-        "are more clicks."
+        "is a triple click."
       );
-      opts.timerId = setTimeout(function () {
-        opts.timerId = 0;
-        autoCopy(e);
-      }, 500);
-    } else {
-      debug("Got anohter click reseting timer");
-      clearTimeout(opts.timerId);
       opts.timerId = setTimeout(function () {
         opts.timerId = 0;
         autoCopy(e);
@@ -351,7 +376,7 @@ function autoCopy(e) {
     inputElement = true;
   }
 
-  if (opts.mouseDownTarget && opts.mouseDownTarget.contentEditable === "true") {
+  if (opts.mouseDownTarget && opts.mouseDownTarget.isContentEditable) {
     debug("Mouse down on content editable element");
     editableElement = true;
   }
@@ -359,8 +384,6 @@ function autoCopy(e) {
   if (opts.enableDebug) {
     console.debug(opts, true);
   }
-
-  debug("Click count: " + e.detail);
 
   if (
     opts.ctrlToDisable

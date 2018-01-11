@@ -4,6 +4,9 @@ chrome.extension.onMessage.addListener(
     if (req.type === "config") {
       opts = {
         'alertOnCopy'                   : false,
+        'alertOnCopySize'               : '14px',
+        'alertOnCopyDuration'           : .75,
+        'alertOnCopyLocation'           : 'bottomRight',
         'removeSelectionOnCopy'         : false,
         'enableForTextBoxes'            : true,
         'enableForContentEditable'      : true,
@@ -36,6 +39,11 @@ chrome.extension.onMessage.addListener(
 	      } else {
 		resp[key] = opts[key];
 	      }
+	    } else if (
+              key === 'alertOnCopySize' || key === 'alertOnCopyDuration' ||
+              key === 'alertOnCopyLocation' 
+            ) {
+	      resp[key] = window.localStorage[key] || opts[key];
 	    } else if (key === 'includeUrlText') {
 	      resp[key] = window.localStorage[key] || opts[key];
 	    } else {

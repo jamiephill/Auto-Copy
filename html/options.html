@@ -26,6 +26,27 @@
 
       <div class="tab tab1">
         <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy</label>
+        <div id="aocSettings" class="indent">
+          <div>
+            <span class="label">Size:</span>
+            <span id="bigger">&#9650;</span>
+            <span id="smaller">&#9660;</span>
+            <div id="aocs">Auto Copied</div>
+            <span class="note">(Note: Click up/down arrows to change the size)</span>
+          </div>
+
+          <div>
+            <span class="label">Duration:</span>
+            <input class="autosave" type="tel" id="aocd" value=".75" maxlength="5"> <span class="note">(Note: This is how long in seconds the notification will be shown)</span>
+          </div>
+          <div class="aocLocation">
+            <span class="label">Location:</span>
+            <input class="autosave" type="radio" id="aocltl" name="aocLocation" value="topLeft"><label for="aocltl">Top Left Corner</label>
+            <input class="autosave" type="radio" id="aocltr" name="aocLocation" value="topRight"><label for="aocltr">Top Right Corner</label>
+            <input class="autosave" type="radio" id="aoclbl" name="aocLocation" value="bottomLeft"><label for="aoclbl">Bottom Left Corner</label>
+            <input class="autosave" type="radio" id="aoclbr" name="aocLocation" value="bottomRight" checked><label for="aoclbr">Bottom Right Corner</label>
+          </div>
+        </div>
         <br>
         <input class="autosave" type="checkbox" id="rsoc"> <label for="rsoc">Remove selection on copy</label>
         <br>
