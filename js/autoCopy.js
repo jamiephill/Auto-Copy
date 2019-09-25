@@ -96,6 +96,20 @@ chrome.extension.sendMessage(
   }
 );
 
+function padDigits(n, width, z) {
+  width   = width || 2;
+  z       = z || 0;
+  n       = String(n);
+  var arr = [];
+
+  if (n.length >= width) {
+    return n;
+  }
+
+  arr.length = width - n.length + 1;
+  return arr.join(z) + n;
+}
+
 function debug(text, standalone) {
   if (opts.enableDebug) {
     if (!standalone) {
@@ -226,6 +240,44 @@ function includeComment(params) {
       comment = comment.replace(/\$crlf/g, crlf);
     }
 
+    var date = new Date();
+    var hr;
+    var timestamp;
+    
+    debug("Month: " + padDigits(date.getMonth() + 1));
+    if (opts.includeUrlText.indexOf('$month') >= 0) {
+      comment = comment.replace(/\$month/g, padDigits(date.getMonth() + 1));
+    }
+    if (opts.includeUrlText.indexOf('$day') >= 0) {
+      comment = comment.replace(/\$day/g, padDigits(date.getDate()));
+    }
+    if (opts.includeUrlText.indexOf('$year') >= 0) {
+      comment = comment.replace(/\$year/g, date.getFullYear());
+    }
+    if (opts.includeUrlText.indexOf('$24hour') >= 0) {
+      comment = comment.replace(/\$24hour/g, padDigits(date.getHours()));
+    }
+    if (opts.includeUrlText.indexOf('$hour') >= 0) {
+      hr = date.getHours();
+      if (hr > 12) {
+        hr -= 12;
+      }
+      comment = comment.replace(/\$hour/g, padDigits(date.getHours()));
+    }
+    if (opts.includeUrlText.indexOf('$minute') >= 0) {
+      comment = comment.replace(/\$minute/g, padDigits(date.getMinutes()));
+    }
+    if (opts.includeUrlText.indexOf('$second') >= 0) {
+      comment = comment.replace(/\$second/g, padDigits(date.getSeconds()));
+    }
+
+    if (opts.includeUrlText.indexOf('$timestamp') >= 0) {
+      timestamp = date.getFullYear() + '-' + padDigits(date.getMonth() + 1) +
+        '-' + padDigits(date.getDate()) + ' ' + padDigits(date.getHours()) +
+        ':' + padDigits(date.getMinutes()) + ':' + padDigits(date.getSeconds());
+      comment = comment.replace(/\$timestamp/g, timestamp);
+    }
+
     if (params.merge) {
       if (opts.prependUrl) {
         debug("Prepending comment: " + comment);
@@ -306,7 +358,7 @@ function autoCopyW(e) {
     }
   }
 
-  debug("Click count: " + e.detail);
+  debug("Click count: " + e.detail + " - mouse travel? " + mouseTravel);
 
   if (opts.pasteOnMiddleClick && e.button === 1) {
     debug("paste requested, calling autoCopy immediately");

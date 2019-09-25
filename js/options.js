@@ -7,6 +7,9 @@ function saveOptions() {
     alert("Error local storage is unavailable.");
   }
 
+  window.localStorage.enableDebug = 
+    document.getElementById("debug").checked ? true : false;
+
   window.localStorage.alertOnCopy = 
     document.getElementById("aoc").checked ? true : false;
   window.localStorage.alertOnCopySize = 
@@ -87,7 +90,8 @@ function restoreOptions() {
     'includeUrlText'                : '$crlfCopied from: $title - <$url>',
     'includeUrlCommentCountEnabled' : false,
     'includeUrlCommentCount'        : 5,
-    'blackList'                     : blackListToObject()
+    'blackList'                     : blackListToObject(),
+    'enableDebug'                   : false
   };
 
   if (!window.localStorage) {
@@ -122,6 +126,7 @@ function restoreOptions() {
     }
   }
   
+  document.getElementById("debug").checked = opts.enableDebug;
   document.getElementById("aoc").checked = opts.alertOnCopy;
   document.getElementById("aocs").style.fontSize = opts.alertOnCopySize;
   document.getElementById("aocd").value = opts.alertOnCopyDuration;
@@ -178,7 +183,9 @@ function restoreOptions() {
 
 function initBlackListDiv(obl) {
   for (var n in obl) {
-    addBlackListRow(decodeURIComponent(n));
+    if (obl[n]) {
+      addBlackListRow(decodeURIComponent(n));
+    }
   }
 }
 

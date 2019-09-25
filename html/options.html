@@ -14,6 +14,9 @@
       Auto Copy - Options
     </h1>
     <!--http://www.mdawson.net/csstips/purecsstabs.php-->
+    <div class="savedSettings">
+      Any open tabs will need to be reloaded in order for the changes to take effect.
+    </div>
     <div class="tabGroup">
       <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
       <label for="rad1">Settings</label>
@@ -68,7 +71,7 @@
 		</select> Auto Copy
 	</label>
         <br>
-	<input class="autosave" type="checkbox" id="acal"> <label for="cal">Press ALT to copy as HTML link</label>
+	<input class="autosave" type="checkbox" id="acal"> <label for="acal">Press ALT to copy as HTML link</label>
         <br>
 	<input class="autosave" type="checkbox" id="cal"> <label for="cal">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
         <br>
@@ -94,11 +97,30 @@
               <div class="indent">Example: <b>http://stratusnine.com/software/auto-copy/</b></div>
               <br>
               <b>$crlf</b> - Inserts a blank line
+              <br>
+              <b>$timestamp</b> - Inserts current timestamp
+              <div class="indent">Format: <b>$year-$month-$day $24hour:$minute:$second (Example: 2019-09-24 13:15:45)</b></div>
+              <br>
+              <b>$month</b> - Inserts current month
+              <br>
+              <b>$day</b> - Inserts current day
+              <br>
+              <b>$year</b> - Inserts current year
+              <br>
+              <b>$24hour</b> - Inserts current hour (24 hour format)
+              <br>
+              <b>$hour</b> - Inserts current hour (12 hour format)
+              <br>
+              <b>$minute</b> - Inserts current minute
+              <br>
+              <b>$second</b> - Inserts current second
             </div>
           </div>
     
         </div>
         <br>
+        <br>
+        <input class="autosave" type="checkbox" name="debug" id="debug"> <label for="debug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
         <!--
         <button id="saveButton">Save &amp; Close</button>
         -->

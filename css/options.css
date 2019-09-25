@@ -132,6 +132,17 @@ h1 {
   /*margin: 20px;*/
 }
 
+div.savedSettings {
+  font-size: 1em;
+  padding: 10px;
+  margin-bottom: 2em;
+  box-shadow: rgb(203, 203, 203) 0px 0px 16px 0px;
+  -webkit-border-radius: 8px;
+  -webkit-box-shadow: 0 0 20px #d0d0d0;
+  border: 1px solid rgb(217, 217, 0);
+  background-color: rgb(255, 255, 92);
+}
+
 .tab {
   -webkit-border-bottom-left-radius: 6px;
   -webkit-border-bottom-right-radius: 6px;
