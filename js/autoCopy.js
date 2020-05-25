@@ -234,7 +234,11 @@ function includeComment(params) {
 
     if (!tflag) {
       debug("Ignoring adding comment due to modifier and state");
-      return;
+      if (params.merge) {
+        return(params.text);
+      }
+
+      return('');
     }
   }
 
