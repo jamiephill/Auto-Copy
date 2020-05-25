@@ -42,10 +42,18 @@ function saveOptions() {
     document.getElementById("acs").value;
   window.localStorage.altToCopyAsLink = 
     document.getElementById("acal").checked ? true : false;
+  window.localStorage.altToCopyAsLinkModifier = 
+    document.getElementById("acalo").value;
   window.localStorage.copyAsLink = 
     document.getElementById("cal").checked ? true : false;
   window.localStorage.includeUrl = 
     document.getElementById("iurl").checked ? true : false;
+  window.localStorage.includeUrlToggle = 
+    document.getElementById("iurlemod").checked ? true : false;
+  window.localStorage.includeUrlToggleModifier = 
+    document.getElementById("iurlmod").value;
+  window.localStorage.includeUrlToggleState = 
+    document.getElementById("iurlemodstate").value;
   window.localStorage.prependUrl = 
     document.getElementById("iurlp").checked ? true : false;
   //---------------------------------------------------------------------
@@ -67,11 +75,13 @@ function saveOptions() {
   } else {
     window.localStorage.includeUrlCommentCount = count;
   }
+
+  disableModifier();
 }
   
 function restoreOptions() {
   opts = {
-    'alertOnCopy'                   : false,
+    'alertOnCopy'                   : true,
     'alertOnCopySize'               : '14px',
     'alertOnCopyDuration'           : .75,
     'alertOnCopyLocation'           : 'bottomRight',
@@ -83,9 +93,13 @@ function restoreOptions() {
     'ctrlToDisableKey'              : 'ctrl',
     'ctrlState'                     : 'disable',
     'altToCopyAsLink'               : false,
+    'altToCopyAsLinkModifier'       : 'alt',
     'copyAsLink'                    : false,
     'copyAsPlainText'               : false,
     'includeUrl'                    : false,
+    'includeUrlToggle'              : false,
+    'includeUrlToggleModifier'      : 'ctrlshift',
+    'includeUrlToggleState'         : 'disable',
     'prependUrl'                    : false,
     'includeUrlText'                : '$crlfCopied from: $title - <$url>',
     'includeUrlCommentCountEnabled' : false,
@@ -113,7 +127,12 @@ function restoreOptions() {
           key === 'alertOnCopyLocation'
         ) {
 	  opts[key] = window.localStorage[key];
-	} else if (key === 'ctrlToDisableKey' || key === 'ctrlState') {
+	} else if (
+          key === 'ctrlToDisableKey' || key === 'ctrlState' ||
+          key === 'altToCopyAsLinkModifier' ||
+          key === 'includeUrlToggleModifier' ||
+          key === 'includeUrlToggleState'
+        ) {
 	  opts[key] = window.localStorage[key];
 	} else if (key === 'includeUrlCommentCount') {
           opts[key] = parseInt(window.localStorage[key], 10);
@@ -148,8 +167,12 @@ function restoreOptions() {
   document.getElementById("dck").value = opts.ctrlToDisableKey;
   document.getElementById("acs").value = opts.ctrlState;
   document.getElementById("acal").checked = opts.altToCopyAsLink;
+  document.getElementById("acalo").value = opts.altToCopyAsLinkModifier;
   document.getElementById("cal").checked = opts.copyAsLink;
   document.getElementById("iurl").checked = opts.includeUrl;
+  document.getElementById("iurlemod").checked = opts.includeUrlToggle;
+  document.getElementById("iurlmod").value = opts.includeUrlToggleModifier;
+  document.getElementById("iurlemodstate").value = opts.includeUrlToggleState;
   document.getElementById("iurltext").value = opts.includeUrlText;
   document.getElementById("iurlewc").checked = 
     opts.includeUrlCommentCountEnabled;
@@ -161,7 +184,7 @@ function restoreOptions() {
   }
   
   var v = opts.prependUrl;
-  if (v === undefined || v === "false") {
+  if (v === undefined || v === false) {
     document.getElementById("iurlp").checked = false;
     document.getElementById("iurla").checked = true;
   } else {
@@ -177,8 +200,32 @@ function restoreOptions() {
     toggleDiv("aocSettings");
   }
 
+  disableModifier();
   blackListToObject();
   handleExclusivity();
+}
+
+function disableModifier() {
+  let els = {};
+  document.querySelectorAll('.modifierKey').forEach((item) => {
+    els[item.options[item.selectedIndex].value] = item;
+    [].forEach.call(item.options, (option) => {
+      option.removeAttribute('disabled');
+    });
+
+  });
+
+  for (let [k, v] of Object.entries(els)) {
+    document.querySelectorAll('.modifierKey').forEach((item) => {
+      if (v.id === item.id) {
+        return;
+      }
+      let option = item.options.namedItem(k);
+      if (option) {
+        option.setAttribute('disabled', '');
+      }
+    });
+  }
 }
 
 function initBlackListDiv(obl) {
@@ -238,13 +285,13 @@ function addToBlackList() {
       domain = domain.match(/^file:\/\/\/([^\/]+)/)[1];
       encodedDomain = encodeURIComponent(domain);
       if (!domain) {
-        addErrorEl.innerText = "Error: speficied domain is invalid";
+        addErrorEl.innerText = "Error: domain is invalid";
         addErrorEl.style.display = "block";
         return;
       }
     } else {
       if (!domain.match(/\./)) {
-        addErrorEl.innerText = "Error: speficied domain is invalid";
+        addErrorEl.innerText = "Error: domain is invalid";
         addErrorEl.style.display = "block";
         return;
       }
@@ -254,7 +301,7 @@ function addToBlackList() {
 
       if (blackList[encodedDomain]) {
         addErrorEl.innerText = 
-          "Error: speficied domain is already in the list";
+          "Error: domain is already in the list";
         addErrorEl.style.display = "block";
         return;
       }
@@ -263,13 +310,13 @@ function addToBlackList() {
     if (domain.match(/^file:/)) {
       encodedDomain = encodeURIComponent(domain);
       if (blackList[encodedDomain]) {
-        addErrorEl.innerText = "Error: speficied page is already in the list";
+        addErrorEl.innerText = "Error: page is already in the list";
         addErrorEl.style.display = "block";
         return;
       }
     } else {
       if (!domain.match(/\./) && !domain.match(/\//)) {
-        addErrorEl.innerText = "Error: speficied page is invalid";
+        addErrorEl.innerText = "Error: page is invalid";
         addErrorEl.style.display = "block";
         return;
       }
@@ -279,16 +326,18 @@ function addToBlackList() {
 
       if (blackList[parsedDomain]) {
         addErrorEl.innerText = 
-          "Error: speficied page's domain is already in the list";
+          "Error: page's domain is already in the list";
         addErrorEl.style.display = "block";
         return;
       } else if (blackList[encodedDomain]) {
-        addErrorEl.innerText = "Error: speficied page is already in the list";
+        addErrorEl.innerText = "Error: page is already in the list";
         addErrorEl.style.display = "block";
         return;
       }
     }
   }
+
+  document.getElementById("domaintext").value = '';
 
   addErrorEl.style.display = "none";
 

@@ -144,13 +144,11 @@ function alertOnCopy(e) {
     el.style.fontFamily      = 'Helvetica, sans-serif';
     el.style.fontStyle       = 'normal';
     el.style.fontWeight      = 'normal';
-    el.style.boxShadow       = '0px 0px 7px 0px #818181';
     el.style.boxShadow       = '0px 0px 16px 0px #CBCBCB';
-    el.style.border          = '1px solid #FAD42E';
     el.style.border          = '1px solid #D9D900';
     el.style.zIndex          = '100000001';
     el.style.textAlign       = 'center';
-    el.style.color           = '#767676';
+    el.style.color           = '#444444';
     el.style.backgroundColor = '#FFFF5C';
     el.style.position        = 'fixed';
     el.style.borderRadius    = '.25em';
@@ -207,6 +205,39 @@ function includeComment(params) {
   var url     = '';
   var crlf    = (opts.copyAsPlainText) ? "\n" : "<br>";
 
+  debug(
+    "Use modifier to " + opts.includeUrlToggleState + " comment? " +
+    opts.includeUrlToggle + 
+    "; modifier key: " + opts.includeUrlToggleModifier
+  );
+  if (opts.includeUrlToggle) {
+    let tflag = false;
+    if (
+      opts.includeUrlToggleState === 'enable' &&
+      modifierKeyActive(params.event, opts.includeUrlToggleModifier)
+    ) {
+      debug(
+        "Modifier key (" + opts.includeUrlToggleModifier +
+        ") was active; adding comment"
+      );
+      tflag = true;
+    } else if (
+      opts.includeUrlToggleState === 'disable' &&
+      !modifierKeyActive(params.event, opts.includeUrlToggleModifier)
+    ) {
+      debug(
+        "Modifier key (" + opts.includeUrlToggleModifier + 
+        ") was not active; adding comment"
+      );
+      tflag = true;
+    }
+
+    if (!tflag) {
+      debug("Ignoring adding comment due to modifier and state");
+      return;
+    }
+  }
+
   if (
     opts.includeUrlCommentCountEnabled &&
     count <= opts.includeUrlCommentCount
@@ -214,6 +245,7 @@ function includeComment(params) {
     debug("Setting comment flag to false");
     flag = false;
   }
+
 
   if (opts.includeUrl && opts.includeUrlText && flag) {
     comment = opts.includeUrlText;
@@ -244,7 +276,6 @@ function includeComment(params) {
     var hr;
     var timestamp;
     
-    debug("Month: " + padDigits(date.getMonth() + 1));
     if (opts.includeUrlText.indexOf('$month') >= 0) {
       comment = comment.replace(/\$month/g, padDigits(date.getMonth() + 1));
     }
@@ -293,10 +324,17 @@ function includeComment(params) {
     return(text);
   }
 
-  return(params.text);
+  if (params.merge) {
+    return(params.text);
+  }
+
+  return('');
 }
 
-function copyAsPlainText() {
+function copyAsPlainText(params) {
+  params = params || {
+    'event' : {}
+  };
   var s;
   var text;
   try {
@@ -314,7 +352,9 @@ function copyAsPlainText() {
     debug("Got selectection: " + text);
 
     if (opts.includeUrl) {
-      text = includeComment({ 'text' : text, 'merge' : true });
+      text = includeComment({
+        'text' : text, 'merge' : true, 'event' : params.event
+      });
     }
 
     debug("Sending copy as plain text: " + text);
@@ -347,6 +387,10 @@ function autoCopyW(e) {
     "Mouse coords: " + e.x + " - " + e.y + " - " + opts.mouseStartX + " - " +
       opts.mouseStartY
   );
+  debug(
+    "Keyboard modifiers: alt=" + e.altKey + " - ctrl=" + e.ctrlKey +
+      " - shift=" + e.shiftKey
+  );
   if (opts.mouseStartX && opts.mouseStartY) {
     x = Math.abs(e.x - opts.mouseStartX);
     y = Math.abs(e.y - opts.mouseStartY);
@@ -375,12 +419,14 @@ function autoCopyW(e) {
   } else if (!mouseTravel && e.detail >= 3) {
     debug("triple click detected -- calling autoCopy immediately");
     clearTimeout(opts.timerId);
+    opts.timerId = 0;
     autoCopy(e);
   } else if (!mouseTravel && e.detail == 2) {
     //-------------------------------------------------------------------------
     // We have to wait before calling auto copy when two clicks are 
     // detected to see if there is going to be a triple click.
     //-------------------------------------------------------------------------
+    debug("timerId? " + opts.timerId);
     if (!opts.timerId) {
       debug(
         "Setting timer to call autoCopy -- need to wait and see if there " +
@@ -392,6 +438,40 @@ function autoCopyW(e) {
       }, 500);
     }
   }
+}
+
+function modifierKeyActive(e, name) {
+  if (
+    name === 'ctrl' && e.ctrlKey && !e.shiftKey && !e.altKey
+  ) {
+    return true;
+  } else if (
+    name === 'alt' && e.altKey && !e.ctrlKey && !e.shiftKey
+  ) {
+    return true;
+  } else if (
+    name === 'shift' && e.shiftKey && !e.ctrlKey && !e.altKey
+  ) {
+    return true;
+  } else if (
+    name === 'ctrlalt' && e.ctrlKey && e.altKey && !e.shiftKey
+  ) {
+    return true;
+  } else if (
+    name === 'ctrlshift' && e.ctrlKey && e.shiftKey && !e.altKey
+  ) {
+    return true;
+  } else if (
+    name === 'ctrlaltshift' && e.ctrlKey && e.shiftKey && e.altKey
+  ) {
+    return true;
+  } else if (
+    name === 'altshift' && e.altKey && e.shiftKey && !e.ctrlKey
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -437,24 +517,37 @@ function autoCopy(e) {
     console.debug(opts, true);
   }
 
-  if (
-    opts.ctrlToDisable
-    && opts.ctrlState === 'enable'
-    && ((opts.ctrlToDisableKey === 'ctrl' && !e.ctrlKey)
-      || (opts.ctrlToDisableKey === 'shift' && !e.shiftKey))
-  ) {
-    debug("Ctrl/shift was not active, ignoring click");
-    return;
-  }
+  debug(
+    "Use modifier to " + opts.ctrlState + " extension? " + opts.ctrlToDisable + 
+    "; modifier key: " + opts.ctrlToDisableKey
+  );
+  if (opts.ctrlToDisable) {
+    let flag = false;
+    if (
+      opts.ctrlState === 'enable' &&
+      modifierKeyActive(e, opts.ctrlToDisableKey)
+    ) {
+      debug(
+        "Modifier key (" + opts.ctrlToDisableKey + ") was active; " + 
+        "doing copy"
+      );
+      flag = true;
+    }
+    if (
+      opts.ctrlState === 'disable' &&
+      !modifierKeyActive(e, opts.ctrlToDisableKey)
+    ) {
+      debug(
+        "Modifier key (" + opts.ctrlToDisableKey + ") was not active; " + 
+        "doing copy"
+      );
+      flag = true;
+    }
 
-  if (
-    opts.ctrlToDisable
-    && opts.ctrlState === 'disable'
-    && ((opts.ctrlToDisableKey === 'ctrl' && e.ctrlKey)
-      || (opts.ctrlToDisableKey === 'shift' && e.shiftKey))
-  ) {
-    debug("Ctrl/shift was active, ignoring click");
-    return;
+    if (!flag) {
+      debug("Ignoring copy due to modifier and state");
+      return;
+    }
   }
 
   if (opts.pasteOnMiddleClick && e.button === 1) {
@@ -515,27 +608,11 @@ function autoCopy(e) {
     return;
   }
 
-  /*
-  if (
-    (!opts.enableForContentEditable &&
-    opts.mouseDownTarget &&
-    opts.mouseDownTarget.contentEditable === "true")
-  ) {
-  */
   if (!opts.enableForContentEditable && editableElement) {
     debug("Extension is not enabled for content editable elements");
     return;
   }
 
-  /*
-  if (
-    !opts.enableForTextBoxes &&
-    opts.mouseDownTarget &&
-    opts.mouseDownTarget.nodeName &&
-    (opts.mouseDownTarget.nodeName === "INPUT" ||
-    opts.mouseDownTarget.nodeName === "TEXTAREA")
-  ) {
-  */
   if (!opts.enableForTextBoxes && inputElement) {
     debug("Extension is not enabled for text boxes");
     return;
@@ -557,8 +634,20 @@ function autoCopy(e) {
   }
 
   try {
-    if (opts.copyAsLink || (opts.altToCopyAsLink && e.altKey)) {
-      debug("performing copy as link");
+    debug(
+      "copy as link: " + opts.copyAsLink + "; Modifier to copy as link: " +
+      opts.altToCopyAsLink + "; modifier key: " + opts.altToCopyAsLinkModifier
+    );
+    if (
+      opts.copyAsLink || (
+        opts.altToCopyAsLink &&
+        modifierKeyActive(e, opts.altToCopyAsLinkModifier)
+      )
+    ) {
+      debug(
+        "performing copy as link; modifier key detected: " +
+        opts.altToCopyAsLinkModifier
+      );
       chrome.extension.sendMessage({
         "type"  : "asLink",
         "text"  : text,
@@ -567,7 +656,7 @@ function autoCopy(e) {
       });
     } else if (opts.copyAsPlainText) {
       debug("performing copy as plain text");
-      copyAsPlainText();
+      copyAsPlainText({ 'event' : e });
     } else if (opts.includeUrl) {
       debug("performing copy with comment");
       //-----------------------------------------------------------------------
@@ -578,7 +667,8 @@ function autoCopy(e) {
       if (rv) {
         text = includeComment({
           'text'  : text,
-          'merge' : false
+          'merge' : false,
+          'event' : e
         });
         debug("Got comment: " + text);
         chrome.extension.sendMessage({
@@ -589,7 +679,7 @@ function autoCopy(e) {
       } else {
         debug("Falling back to plain text copy");
         opts.copyAsPlainText = true;
-        copyAsPlainText();
+        copyAsPlainText({ 'event' : e });
         opts.copyAsPlainText = false;
       }
     } else {
@@ -603,7 +693,7 @@ function autoCopy(e) {
       if (!rv) {
         debug("Falling back to plain text copy");
         opts.copyAsPlainText = true;
-        copyAsPlainText();
+        copyAsPlainText({ 'event' : e });
         opts.copyAsPlainText = false;
       }
     }

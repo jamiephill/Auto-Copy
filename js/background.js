@@ -3,7 +3,7 @@ chrome.extension.onMessage.addListener(
     var rv, el, text, resp = {}, opts = {}, key;
     if (req.type === "config") {
       opts = {
-        'alertOnCopy'                   : false,
+        'alertOnCopy'                   : true,
         'alertOnCopySize'               : '14px',
         'alertOnCopyDuration'           : .75,
         'alertOnCopyLocation'           : 'bottomRight',
@@ -15,9 +15,13 @@ chrome.extension.onMessage.addListener(
         'ctrlToDisableKey'              : 'ctrl',
         'ctrlState'                     : 'disable',
         'altToCopyAsLink'               : false,
+        'altToCopyAsLinkModifier'       : 'alt',
         'copyAsLink'                    : false,
         'copyAsPlainText'               : false,
         'includeUrl'                    : false,
+        'includeUrlToggle'              : false,
+        'includeUrlToggleModifier'      : 'ctrlshift',
+        'includeUrlToggleState'         : 'disable',
         'prependUrl'                    : false,
         'includeUrlText'                : '$crlfCopied from: $title - <$url>',
         'includeUrlCommentCountEnabled' : false,
@@ -41,7 +45,10 @@ chrome.extension.onMessage.addListener(
 	      }
 	    } else if (
               key === 'alertOnCopySize' || key === 'alertOnCopyDuration' ||
-              key === 'alertOnCopyLocation' 
+              key === 'alertOnCopyLocation' ||
+              key === 'altToCopyAsLinkModifier' ||
+              key === 'includeUrlToggleModifier' ||
+              key === 'includeUrlToggleState'
             ) {
 	      resp[key] = window.localStorage[key] || opts[key];
 	    } else if (key === 'includeUrlText') {
@@ -68,9 +75,11 @@ chrome.extension.onMessage.addListener(
 	el.focus();
 	rv = document.execCommand('paste');
 	//console.log("Paste: " + rv);
-	if (req.opts.prependUrl) {
+	if (req.opts.prependUrl && req.comment) {
+          //console.log("prepending comment: " + req.comment);
 	  el.innerHTML = req.comment + '<br>' + el.innerHTML;
-	} else {
+	} else if (req.comment) {
+          //console.log("postpending comment: " + req.comment);
 	  el.innerHTML = el.innerHTML + '<br>' + req.comment;
 	}
 	document.execCommand('SelectAll');

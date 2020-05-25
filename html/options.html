@@ -9,185 +9,239 @@
   </head>
 
   <body>
-    <h1>
-      <img id="logo" src="/assets/autoCopy-128.png" width="64" height="64" alt="logo">
-      Auto Copy - Options
-    </h1>
-    <!--http://www.mdawson.net/csstips/purecsstabs.php-->
-    <div class="savedSettings">
-      Any open tabs will need to be reloaded in order for the changes to take effect.
-    </div>
-    <div class="tabGroup">
-      <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
-      <label for="rad1">Settings</label>
-      <input type="radio" name="tabGroup1" id="rad2" class="tab2">
-      <label for="rad2">Blacklist</label>
-      <input type="radio" name="tabGroup1" id="rad3" class="tab3">
-      <label for="rad3">About</label>
+    <header>
+      <div>
+        <img id="logo" src="/assets/autoCopy-128.png" width="64" height="64" alt="logo">
+        <span>Auto Copy</span>
+      </div>
+    </header>
+    <main>
+      <div class="savedSettings">
+        Any open tabs will need to be reloaded in order for changes to take effect.
+      </div>
 
-      <br>
+      <div class="tabGroup">
+        <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
+        <label for="rad1">Settings</label>
+        <input type="radio" name="tabGroup1" id="rad2" class="tab2">
+        <label for="rad2">Blacklist</label>
+        <input type="radio" name="tabGroup1" id="rad3" class="tab3">
+        <label for="rad3">Donate</label>
+        <input type="radio" name="tabGroup1" id="rad4" class="tab4">
+        <label for="rad4">About</label>
 
-      <div class="tab tab1">
-        <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy</label>
-        <div id="aocSettings" class="indent">
-          <div>
-            <span class="label">Size:</span>
-            <span id="bigger">&#9650;</span>
-            <span id="smaller">&#9660;</span>
-            <div id="aocs">Auto Copied</div>
-            <span class="note">(Note: Click up/down arrows to change the size)</span>
-          </div>
+        <br>
 
-          <div>
-            <span class="label">Duration:</span>
-            <input class="autosave" type="tel" id="aocd" value=".75" maxlength="5"> <span class="note">(Note: This is how long in seconds the notification will be shown)</span>
-          </div>
-          <div class="aocLocation">
-            <span class="label">Location:</span>
-            <input class="autosave" type="radio" id="aocltl" name="aocLocation" value="topLeft"><label for="aocltl">Top Left Corner</label>
-            <input class="autosave" type="radio" id="aocltr" name="aocLocation" value="topRight"><label for="aocltr">Top Right Corner</label>
-            <input class="autosave" type="radio" id="aoclbl" name="aocLocation" value="bottomLeft"><label for="aoclbl">Bottom Left Corner</label>
-            <input class="autosave" type="radio" id="aoclbr" name="aocLocation" value="bottomRight" checked><label for="aoclbr">Bottom Right Corner</label>
-          </div>
-        </div>
-        <br>
-        <input class="autosave" type="checkbox" id="rsoc"> <label for="rsoc">Remove selection on copy</label>
-        <br>
-        <input class="autosave" type="checkbox" id="eitb"> <label for="eitb">Enable in text boxes</label>
-        <br>
-        <input class="autosave" type="checkbox" id="eice"> <label for="eice">Enable in content editable elements</label>
-        <br>
-        <!---->
-	<input class="autosave" type="checkbox" id="pomc"> <label for="pomc">Paste on middle click</label>
-        <br>
-	<input class="autosave" type="checkbox" id="dc"> <label for="dc">
-		Press <select class="autosave" id="dck">
-			<option value="ctrl">CTRL</option>
-			<option value="shift">Shift</option>
-		</select>
-		key while selecting to <select class="autosave" id="acs">
-			<option value="enable">enable</option>
-			<option value="disable">disable</option>
-		</select> Auto Copy
-	</label>
-        <br>
-	<input class="autosave" type="checkbox" id="acal"> <label for="acal">Press ALT to copy as HTML link</label>
-        <br>
-	<input class="autosave" type="checkbox" id="cal"> <label for="cal">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
-        <br>
-	<input class="autosave" type="checkbox" id="capt"> <label for="capt">Copy without formatting <span class="note">(Note: Chrome v43 started supporting copy with formating again.  If this is not available it will fallback to copy without formating.)</span></label>
-	<br>
-	<input class="autosave" type="checkbox" id="iurl"> <label for="iurl">Include an informational comment</label>
-        <div id="diviurlap" class="indent">
-          <input class="autosave" type="checkbox" name="iurlewc" id="iurlewc"> <label for="iurlewc"><span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="text" maxlength="2" size="1" id="iurlcount" value="5"> words are selected</span></label>
-          <br>
-	  <input class="autosave" type="radio" name="iurlap" id="iurlp"> <label for="iurlp">Add the comment to the beginning of the copied text</label>
-          <br>
-	  <input class="autosave" type="radio" name="iurlap" id="iurla" checked="checked"> <label for="iurla">Add the comment to the end of the copied text</label>
-          <br>
-          Format: <input class="autosave" type="text" size="64" id="iurltext" value="$crlfCopied from: $title - <$url>"> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
-          <div class="indent note larger">
-            The comment can contain the following variables:
-            <br>
-            <div class="indent">
-              <b>$title</b> - Document title 
-              <div class="indent">Example: <b>stratus nine: auto copy</b></div>
-              <br>
-              <b>$url</b> - Document URL
-              <div class="indent">Example: <b>http://stratusnine.com/software/auto-copy/</b></div>
-              <br>
-              <b>$crlf</b> - Inserts a blank line
-              <br>
-              <b>$timestamp</b> - Inserts current timestamp
-              <div class="indent">Format: <b>$year-$month-$day $24hour:$minute:$second (Example: 2019-09-24 13:15:45)</b></div>
-              <br>
-              <b>$month</b> - Inserts current month
-              <br>
-              <b>$day</b> - Inserts current day
-              <br>
-              <b>$year</b> - Inserts current year
-              <br>
-              <b>$24hour</b> - Inserts current hour (24 hour format)
-              <br>
-              <b>$hour</b> - Inserts current hour (12 hour format)
-              <br>
-              <b>$minute</b> - Inserts current minute
-              <br>
-              <b>$second</b> - Inserts current second
+        <div class="tab tab1">
+          <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy</label>
+          <div id="aocSettings" class="indent">
+            <div>
+              <span class="label">Size:</span>
+              <span id="bigger">&#9650;</span>
+              <span id="smaller">&#9660;</span>
+              <div id="aocs">Auto Copied</div>
+              <span class="note">(Note: Click up/down arrows to change the size)</span>
+            </div>
+
+            <div>
+              <span class="label">Duration:</span>
+              <input class="autosave" type="tel" id="aocd" value=".75" maxlength="5"> <span class="note">(Note: This is how long in seconds the notification will be shown)</span>
+            </div>
+            <div class="aocLocation">
+              <span class="label">Location:</span>
+              <input class="autosave" type="radio" id="aocltl" name="aocLocation" value="topLeft"><label for="aocltl">Top Left Corner</label>
+              <input class="autosave" type="radio" id="aocltr" name="aocLocation" value="topRight"><label for="aocltr">Top Right Corner</label>
+              <input class="autosave" type="radio" id="aoclbl" name="aocLocation" value="bottomLeft"><label for="aoclbl">Bottom Left Corner</label>
+              <input class="autosave" type="radio" id="aoclbr" name="aocLocation" value="bottomRight" checked><label for="aoclbr">Bottom Right Corner</label>
             </div>
           </div>
-    
+          <br>
+          <input class="autosave" type="checkbox" id="rsoc"> <label for="rsoc">Remove selection on copy</label>
+          <br>
+          <input class="autosave" type="checkbox" id="eitb"> <label for="eitb">Enable in text boxes</label>
+          <br>
+          <input class="autosave" type="checkbox" id="eice"> <label for="eice">Enable in content editable elements</label>
+          <br>
+          <!---->
+          <input class="autosave" type="checkbox" id="pomc"> <label for="pomc">Paste on middle click</label>
+          <br>
+          <input class="autosave" type="checkbox" id="dc"> <label for="dc">
+                  Press <select class="select-css modifierKey autosave" id="dck">
+                    <option id="ctrl" value="ctrl">CTRL</option>
+                    <option id="shift" value="shift">Shift</option>
+                    <option id="alt" value="alt">ALT</option>
+                    <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
+                    <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
+                    <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
+                    <option id="altshift" value="altshift">ALT-Shift</option>
+                  </select>
+                  key while selecting to <select class="select-css autosave" id="acs">
+                    <option value="enable">enable</option>
+                    <option value="disable">disable</option>
+                  </select> Auto Copy
+          </label>
+          <br>
+          <input class="autosave" type="checkbox" id="acal"> <label for="acal">
+            Press <select class="select-css modifierKey autosave" id="acalo">
+                    <option id="ctrl" value="ctrl">CTRL</option>
+                    <option id="shift" value="shift">Shift</option>
+                    <option id="alt" value="alt">ALT</option>
+                    <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
+                    <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
+                    <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
+                    <option id="altshift" value="altshift">ALT-Shift</option>
+                  </select> to copy as HTML link</label>
+          <br>
+          <input class="autosave" type="checkbox" id="cal"> <label for="cal">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
+          <br>
+          <input class="autosave" type="checkbox" id="capt"> <label for="capt">Copy without formatting</label>
+          <br>
+          <input class="autosave" type="checkbox" id="iurl"> <label for="iurl">Include an informational comment</label>
+          <div id="diviurlap" class="indent">
+            <input class="autosave" type="checkbox" name="iurlemod" id="iurlemod"> <label for="iurlemod">
+              Press <select class="select-css modifierKey autosave" id="iurlmod">
+                <option id="ctrl" value="ctrl">CTRL</option>
+                <option id="shift" value="shift">Shift</option>
+                <option id="alt" value="alt">ALT</option>
+                <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
+                <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
+                <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
+                <option id="altshift" value="altshift">ALT-Shift</option>
+              </select>
+              key while selecting to <select class="select-css autosave" id="iurlemodstate">
+                <option value="enable">enable</option>
+                <option value="disable">disable</option>
+              </select> informational comment
+            </label>
+            <br>
+            <input class="autosave" type="checkbox" name="iurlewc" id="iurlewc"> <label for="iurlewc"><span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="text" maxlength="2" size="1" id="iurlcount" value="5"> words are selected</span></label>
+            <br>
+            <input class="autosave" type="radio" name="iurlap" id="iurlp"> <label for="iurlp">Add the comment to the beginning of the copied text</label>
+            <br>
+            <input class="autosave" type="radio" name="iurlap" id="iurla" checked="checked"> <label for="iurla">Add the comment to the end of the copied text</label>
+            <br>
+            Format: <input class="autosave" type="text" size="64" id="iurltext" value="$crlfCopied from: $title - <$url>"> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
+            <div class="indent note larger">
+              The comment can contain the following variables:
+              <br>
+              <div class="indent">
+                <b>$title</b> - Document title 
+                <div class="indent">Example: <b>stratus nine: auto copy</b></div>
+                <br>
+                <b>$url</b> - Document URL
+                <div class="indent">Example: <b>http://stratusnine.com/software/auto-copy/</b></div>
+                <br>
+                <b>$crlf</b> - Inserts a blank line
+                <br>
+                <b>$timestamp</b> - Inserts current timestamp
+                <div class="indent">Format: <b>$year-$month-$day $24hour:$minute:$second (Example: 2019-09-24 13:15:45)</b></div>
+                <br>
+                <b>$month</b> - Inserts current month
+                <br>
+                <b>$day</b> - Inserts current day
+                <br>
+                <b>$year</b> - Inserts current year
+                <br>
+                <b>$24hour</b> - Inserts current hour (24 hour format)
+                <br>
+                <b>$hour</b> - Inserts current hour (12 hour format)
+                <br>
+                <b>$minute</b> - Inserts current minute
+                <br>
+                <b>$second</b> - Inserts current second
+              </div>
+            </div>
+      
+          </div>
+          <br>
+          <br>
+          <input class="autosave" type="checkbox" name="debug" id="debug"> <label for="debug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
+          <!--
+          <button id="saveButton">Save &amp; Close</button>
+          -->
         </div>
-        <br>
-        <br>
-        <input class="autosave" type="checkbox" name="debug" id="debug"> <label for="debug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
-        <!--
-        <button id="saveButton">Save &amp; Close</button>
-        -->
+        <div class="tab tab2">
+          <!--
+          <select id="blsel" multiple="multiple" size="5">
+            <option value="docs.google.com">docs.google.com</option>
+          </select>
+          -->
+          <div id="blacklist">
+          </div>
+          <div>
+            Some sites, like Google Docs, have issues with Auto Copy.  The blacklist allows you to define sites (or pages) that Auto Copy will be disabled on.
+          </div>
+          <div class="clear">
+            <button id="addBtn">Add New Entry</button>
+            <button id="removeBtn">Remove Selected Entries</button>
+          </div>
+        </div>
+        <div class="tab tab3">
+          <p>If you like this extension, please consider donating to help support the development effort.  Thanks!</p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+  ">
+            <!--
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+            -->
+            <input type="submit" name="paypal" id="paypal"><label for="paypal">Paypal</label>
+          </form>
+          
+        </div>
+        <div class="tab tab4">
+          <p><a target="_blank" href="http://stratusnine.com/software/auto-copy/">Auto Copy</a> is a browser extension that will automatically copy any selected text to the clipboard.</p>
+
+          <h2>Features</h2>
+          <p>Auto Copy has several features that are configurable from the settings tab:</p>
+
+          <ul>
+            <li>Notification on copy</li>
+            <li>Remove selection on copy</li>
+            <li>Enable / disable in text boxes</li>
+            <li>Enable / disable in content editable elements</li>
+            <li>Paste on middle click</li>
+            <li>Use modifier key(s) to enable / disable auto copy</li>
+            <li>Use modifier key(s) to copy as a link</li>
+            <li>Always copy as a link</li>
+            <li>Copy without formatting</li>
+            <li>Include informational comment with optional formatting items</li>
+            <li>Use modifier key(s) to enable / disable informational comment</li>
+            <li>Blacklist websites to automatically disable the extension</li>
+          </ul>
+
+          <h2>Notes</h2>
+          <p>The extension works with any URL type, but to support file:/// URLs you must enable this on the extension management page by checking the setting 'Allow access to file URLs'.</p>
+
+          <p class="bold">When an option is changed, web pages must be reloaded before the changes will take effect.</p>
+
+          <h2>Attributions</h2>
+          <p>Many thanks to <a href="http://www.ericportfolio.com/">Eric Porter</a> for creating the icon and promotional image.</p>
+
+          <h2>Contact</h2>
+          <p>If you have a feature request, bug fix, or general feedback please feel free to get in touch with me on <a target="_blank" href="mailto:autocopy@jamiehill.com">email</a>.
+        </div>
       </div>
-      <div class="tab tab2">
-        <!--
-        <select id="blsel" multiple="multiple" size="5">
-          <option value="docs.google.com">docs.google.com</option>
-        </select>
-        -->
-        <div id="blacklist">
-        </div>
+      <div id="overlay">
         <div>
-          Some sites, like Google Docs, have issues with Auto Copy.  The blacklist allows you to define sites (or pages) that Auto Copy will be disabled on.
-        </div>
-        <div class="clear">
-          <button id="addBtn">Add New Entry</button>
-          <button id="removeBtn">Remove Selected Entries</button>
+          <input type="radio" name="blacklistType" id="blacklistDomain" checked="checked"> <label for="blacklistDomain">Blacklist web site</label>
+          <br>
+          <input type="radio" name="blacklistType" id="blacklistURL"> <label for="blacklistURL">Blacklist web page</label>
+          <div id="addError"></div>
+          <input type="text" id="domaintext" placeholder="domain or web page">
+          <br>
+          <button class="overlayButton" id="addOverlayBtn">Add</button>
+          <button class="overlayButton" id="cancelOverlayBtn">Close</button>
         </div>
       </div>
-      <div class="tab tab3">
-        <p><a target="_blank" href="http://stratusnine.com/software/auto-copy/">Auto Copy</a> is a Chrome extension that will automatically copy any selected text to the clipboard.</p>
-
-        <h2>Features</h2>
-        <p>Auto Copy has several features that are configurable from the options page:</p>
-
-        <ul>
-          <li>Enable/disable auto copy for text fields</li>
-          <li>Include a comment with copied text. The comment can be formated and has macro expansion.</li>
-          <li>Paste on middle-click</li>
-          <li>Blacklists to allow disabling of the extension on certain websites</li>
-        </ul>
-
-        <h2>Notes</h2>
-        <p>The extension works with any URL type, but to support file:/// URLs you must enable this on the Chrome extension management page by checking the setting 'Allow access to file URLs'.  Content-scripts are automatically disabled in the Chrome Web Store for security reasons. Please keep this in mind when testing the extension.</p>
-
-        <p>When an option is changed, web pages must be reloaded before the changed option will take effect.</p>
-
-        <h2>Attributions</h2>
-        <p>Many thanks to <a href="http://www.ericportfolio.com/">Eric Porter</a> for creating the icon and promotional image.</p>
-
-        <h2>Donate</h2>
-	<p>If you like this extension please consider donating a little to help support the development effort.  Thanks!</p>
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
-	
-
-        <h2>Contact</h2>
-	<p>If you have a feature request, bug fix, or general feedback please feel free to get in touch with me on <!--<a target="_blank" href="https://twitter.com/stratus9">twitter</a> or --><a target="_blank" href="mailto:autocopy@jamiehill.com">email</a>.
-      </div>
-    </div>
-    <div id="overlay">
+    </main>
+    <footer>
       <div>
-        <input type="radio" name="blacklistType" id="blacklistDomain" checked="checked"> <label for="blacklistDomain">Blacklist entire domain</label>
-	-OR-
-        <input type="radio" name="blacklistType" id="blacklistURL"> <label for="blacklistURL">Blacklist a specific page</label>
-	<div id="addError"></div>
-        <input type="text" id="domaintext">
-	<br>
-        <button id="addOverlayBtn">Add</button>
-        <button id="cancelOverlayBtn">Close</button>
+        <span>v4.1.7</span>
+        <span class="separator">.</span>
+        <span><a href="https://stratusnine.com/software/auto-copy/auto-copy-privacy-policy/">Privacy Policy</a></span>
       </div>
-    </div>
+    </footer>
+
   </body>
 </html>
