@@ -105,6 +105,9 @@ body {
   color: #444;
 }
 
+div#clearClipboardSettings,
+div#copyDelaySettings,
+div#nativeAlertOnCopySettings,
 div#aocSettings {
   user-select: none;
   display: none;
@@ -128,6 +131,8 @@ div#aocSettings div:nth-of-type(3) span.label {
   top: -3px;
 }
 
+input#clearClipboardWait,
+input#copyDelayWait,
 input#aocd {
   width: 4em;
 }
@@ -277,9 +282,9 @@ input[type="checkbox"] {
   top: 2px;
 }
 
-/* Blacklist */
-div#blacklist {
-  float: left;
+/* blocklist */
+div#blocklist {
+  /*float: left;*/
   top: 0;
   left: 0;
   right: 0;
@@ -293,20 +298,20 @@ div#blacklist {
   min-height: 120px;
 }
 
-div#blacklist div.row {
+div#blocklist div.row {
   cursor: pointer;
   padding: 0 4px;
   padding: .15em .5em;
 }
 
-div#blacklist div.row:last-of-type {
+div#blocklist div.row:last-of-type {
   border: none;
 }
 
-div#blacklist div.stripe {
+div#blocklist div.stripe {
 }
 
-div#blacklist .selected {
+div#blocklist .selected {
   background-color: #EEE !important;
 }
 
@@ -390,7 +395,7 @@ div.clear {
 }
 
 /* Overlay */
-#overlay input#blacklistDomain {
+#overlay input#blocklistDomain {
   margin-bottom: .5em;
 }
 

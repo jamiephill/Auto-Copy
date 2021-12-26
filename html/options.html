@@ -24,7 +24,7 @@
         <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
         <label for="rad1">Settings</label>
         <input type="radio" name="tabGroup1" id="rad2" class="tab2">
-        <label for="rad2">Blacklist</label>
+        <label for="rad2">Blocklist</label>
         <input type="radio" name="tabGroup1" id="rad3" class="tab3">
         <label for="rad3">Donate</label>
         <input type="radio" name="tabGroup1" id="rad4" class="tab4">
@@ -33,7 +33,7 @@
         <br>
 
         <div class="tab tab1">
-          <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy</label>
+          <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy &ndash; in browser notification</label>
           <div id="aocSettings" class="indent">
             <div>
               <span class="label">Size:</span>
@@ -54,6 +54,11 @@
               <input class="autosave" type="radio" id="aoclbl" name="aocLocation" value="bottomLeft"><label for="aoclbl">Bottom Left Corner</label>
               <input class="autosave" type="radio" id="aoclbr" name="aocLocation" value="bottomRight" checked><label for="aoclbr">Bottom Right Corner</label>
             </div>
+          </div>
+          <br>
+          <input class="autosave" type="checkbox" id="nativeAlertOnCopy" name="nativeAlertOnCopy"> <label for="nativeAlertOnCopy">Alert on copy &ndash; native system notification</label>
+          <div id="nativeAlertOnCopySettings" class="indent">
+            <input class="autosave" type="checkbox" id="nativeAlertOnCopySound" name="nativeAlertOnCopySound"> <label for="nativeAlertOnCopySound">Play sound <span class="note">(Note: may not work on all operating systems)</span></label>
           </div>
           <br>
           <input class="autosave" type="checkbox" id="rsoc"> <label for="rsoc">Remove selection on copy</label>
@@ -95,6 +100,8 @@
           <input class="autosave" type="checkbox" id="cal"> <label for="cal">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
           <br>
           <input class="autosave" type="checkbox" id="capt"> <label for="capt">Copy without formatting</label>
+          <br>
+          <input class="autosave" type="checkbox" name="trimWhitespace" id="trimWhitespace"> <label for="trimWhitespace">Remove whitespace from the begining and ending of selection <span class="note">(Note: this option will remove formatting)</span></label>
           <br>
           <input class="autosave" type="checkbox" id="iurl"> <label for="iurl">Include an informational comment</label>
           <div id="diviurlap" class="indent">
@@ -154,6 +161,16 @@
       
           </div>
           <br>
+          <input class="autosave" type="checkbox" name="copyDelay" id="copyDelay"> <label for="copyDelay">Copy delay</label>
+          <div id="copyDelaySettings" class="indent">
+            Delay: <input class="autosave" type="tel" name="copyDelayWait" id="copyDelayWait" maxlength="5"> <span class="note">(Note: This is how long in seconds to wait before copying the selection)</span>
+          </div>
+          <br>
+          <input class="autosave" type="checkbox" name="clearClipboard" id="clearClipboard"> <label for="clearClipboard">Clear clipboard</label>
+          <div id="clearClipboardSettings" class="indent">
+            Delay: <input class="autosave" type="tel" name="clearClipboardWait" id="clearClipboardWait" maxlength="5"> <span class="note">(Note: This is how long in seconds to wait before clearing the clipboard)</span>
+          </div>
+          <br>
           <br>
           <input class="autosave" type="checkbox" name="debug" id="debug"> <label for="debug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
           <!--
@@ -166,10 +183,10 @@
             <option value="docs.google.com">docs.google.com</option>
           </select>
           -->
-          <div id="blacklist">
+          <div id="blocklist">
           </div>
           <div>
-            Some sites, like Google Docs, have issues with Auto Copy.  The blacklist allows you to define sites (or pages) that Auto Copy will be disabled on.
+            Some sites, like Google Docs, have issues with Auto Copy.  The blocklist allows you to define sites (or pages) that Auto Copy will be disabled on.
           </div>
           <div class="clear">
             <button id="addBtn">Add New Entry</button>
@@ -205,9 +222,12 @@
             <li>Use modifier key(s) to copy as a link</li>
             <li>Always copy as a link</li>
             <li>Copy without formatting</li>
+            <li>Trim whitespaces</li>
+            <li>Copy delay</li>
+            <li>Clear clipboard</li>
             <li>Include informational comment with optional formatting items</li>
             <li>Use modifier key(s) to enable / disable informational comment</li>
-            <li>Blacklist websites to automatically disable the extension</li>
+            <li>Blocklist websites to automatically disable the extension</li>
           </ul>
 
           <h2>Notes</h2>
@@ -224,9 +244,9 @@
       </div>
       <div id="overlay">
         <div>
-          <input type="radio" name="blacklistType" id="blacklistDomain" checked="checked"> <label for="blacklistDomain">Blacklist web site</label>
+          <input type="radio" name="blocklistType" id="blocklistDomain" checked="checked"> <label for="blocklistDomain">Blocklist web site</label>
           <br>
-          <input type="radio" name="blacklistType" id="blacklistURL"> <label for="blacklistURL">Blacklist web page</label>
+          <input type="radio" name="blocklistType" id="blocklistURL"> <label for="blocklistURL">Blocklist web page</label>
           <div id="addError"></div>
           <input type="text" id="domaintext" placeholder="domain or web page">
           <br>
@@ -237,7 +257,7 @@
     </main>
     <footer>
       <div>
-        <span>v4.1.7</span>
+        <span>v4.1.8</span>
         <span class="separator">.</span>
         <span><a href="https://stratusnine.com/software/auto-copy/auto-copy-privacy-policy/">Privacy Policy</a></span>
       </div>

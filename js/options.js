@@ -1,4 +1,4 @@
-var blackList = {
+var blockList = {
   "init" : true
 };
 
@@ -69,6 +69,21 @@ function saveOptions() {
   window.localStorage.includeUrlCommentCountEnabled = 
     document.getElementById("iurlewc").checked ? true : false;
 
+  window.localStorage.copyDelay = 
+    document.getElementById("copyDelay").checked ? true : false;
+  window.localStorage.copyDelayWait = 
+    document.getElementById("copyDelayWait").value;
+  window.localStorage.clearClipboard = 
+    document.getElementById("clearClipboard").checked ? true : false;
+  window.localStorage.clearClipboardWait = 
+    document.getElementById("clearClipboardWait").value;
+  window.localStorage.trimWhitespace = 
+    document.getElementById("trimWhitespace").checked ? true : false;
+  window.localStorage.nativeAlertOnCopy = 
+    document.getElementById("nativeAlertOnCopy").checked ? true : false;
+  window.localStorage.nativeAlertOnCopySound = 
+    document.getElementById("nativeAlertOnCopySound").checked ? true : false;
+
   var count = parseInt(document.getElementById("iurlcount").value,10);
   if (count < 1 || count > 99 || isNaN(count)) {
     window.localStorage.includeUrlCommentCount = 5;
@@ -104,8 +119,15 @@ function restoreOptions() {
     'includeUrlText'                : '$crlfCopied from: $title - <$url>',
     'includeUrlCommentCountEnabled' : false,
     'includeUrlCommentCount'        : 5,
-    'blackList'                     : blackListToObject(),
-    'enableDebug'                   : false
+    'blockList'                     : blockListToObject(),
+    'enableDebug'                   : false,
+    'copyDelay'                     : false,
+    'copyDelayWait'                 : 5,
+    'clearClipboard'                : false,
+    'clearClipboardWait'            : 10,
+    'trimWhitespace'                : false,
+    'nativeAlertOnCopy'             : false,
+    'nativeAlertOnCopySound'        : false,
   };
 
   if (!window.localStorage) {
@@ -120,11 +142,13 @@ function restoreOptions() {
   if (window.localStorage != null) {
     for (key in opts) {
       if (window.localStorage.hasOwnProperty(key)) {
-	if (key === 'blackList') {
-	  opts[key] = blackListToObject();
+	if (key === 'blockList') {
+	  opts[key] = blockListToObject();
 	} else if (
           key === 'alertOnCopySize' || key === 'alertOnCopyDuration' ||
-          key === 'alertOnCopyLocation'
+          key === 'alertOnCopyLocation' ||
+          key === 'copyDelayWait' ||
+          key === 'clearClipboardWait'
         ) {
 	  opts[key] = window.localStorage[key];
 	} else if (
@@ -182,6 +206,15 @@ function restoreOptions() {
   } else {
     document.getElementById("iurlcount").disabled = true;
   }
+
+  document.getElementById("copyDelay").checked = opts.copyDelay;
+  document.getElementById("copyDelayWait").value = opts.copyDelayWait;
+  document.getElementById("clearClipboard").checked = opts.clearClipboard;
+  document.getElementById("clearClipboardWait").value = opts.clearClipboardWait;
+  document.getElementById("trimWhitespace").checked = opts.trimWhitespace;
+  document.getElementById("nativeAlertOnCopy").checked = opts.nativeAlertOnCopy;
+  document.getElementById("nativeAlertOnCopySound").checked =
+    opts.nativeAlertOnCopySound;
   
   var v = opts.prependUrl;
   if (v === undefined || v === false) {
@@ -200,8 +233,20 @@ function restoreOptions() {
     toggleDiv("aocSettings");
   }
 
+  if (opts.nativeAlertOnCopy) {
+    toggleDiv("nativeAlertOnCopySettings");
+  }
+
+  if (opts.copyDelay) {
+    toggleDiv("copyDelaySettings");
+  }
+
+  if (opts.clearClipboard) {
+    toggleDiv("clearClipboardSettings");
+  }
+
   disableModifier();
-  blackListToObject();
+  blockListToObject();
   handleExclusivity();
 }
 
@@ -228,16 +273,16 @@ function disableModifier() {
   }
 }
 
-function initBlackListDiv(obl) {
+function initBlockListDiv(obl) {
   for (var n in obl) {
     if (obl[n]) {
-      addBlackListRow(decodeURIComponent(n));
+      addBlockListRow(decodeURIComponent(n));
     }
   }
 }
 
-function addBlackListRow(text) {
-  var blEl  = document.getElementById("blacklist");
+function addBlockListRow(text) {
+  var blEl  = document.getElementById("blocklist");
   var frag  = document.createDocumentFragment();
   var divEl = document.createElement("div");
   frag.appendChild(divEl);
@@ -271,11 +316,11 @@ function stripeList(id) {
   }
 }
 
-function addToBlackList() {
+function addToBlockList() {
   var overlay     = document.getElementById("overlay");
   var addErrorEl  = document.getElementById("addError")
   var domain      = document.getElementById("domaintext").value;
-  var selectionD  = document.getElementById("blacklistDomain").checked;
+  var selectionD  = document.getElementById("blocklistDomain").checked;
   var encodedDomain, parsedDomain;
 
   addErrorEl.style.display = "none";
@@ -299,7 +344,7 @@ function addToBlackList() {
       domain = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
       encodedDomain = encodeURIComponent(domain);
 
-      if (blackList[encodedDomain]) {
+      if (blockList[encodedDomain]) {
         addErrorEl.innerText = 
           "Error: domain is already in the list";
         addErrorEl.style.display = "block";
@@ -309,7 +354,7 @@ function addToBlackList() {
   } else {
     if (domain.match(/^file:/)) {
       encodedDomain = encodeURIComponent(domain);
-      if (blackList[encodedDomain]) {
+      if (blockList[encodedDomain]) {
         addErrorEl.innerText = "Error: page is already in the list";
         addErrorEl.style.display = "block";
         return;
@@ -324,12 +369,12 @@ function addToBlackList() {
       parsedDomain  = domain.replace(/.*:\/\//,"").replace(/\/.*/,"");
       encodedDomain = encodeURIComponent(domain);
 
-      if (blackList[parsedDomain]) {
+      if (blockList[parsedDomain]) {
         addErrorEl.innerText = 
           "Error: page's domain is already in the list";
         addErrorEl.style.display = "block";
         return;
-      } else if (blackList[encodedDomain]) {
+      } else if (blockList[encodedDomain]) {
         addErrorEl.innerText = "Error: page is already in the list";
         addErrorEl.style.display = "block";
         return;
@@ -341,12 +386,12 @@ function addToBlackList() {
 
   addErrorEl.style.display = "none";
 
-  blackList[encodedDomain] = 1;
-  blackListToString(blackList);
-  addBlackListRow(domain);
+  blockList[encodedDomain] = 1;
+  blockListToString(blockList);
+  addBlockListRow(domain);
 }
 
-function removeSelectedFromBlackList() {
+function removeSelectedFromBlockList() {
   var els           = document.querySelectorAll('div.selected');
   var len           = els.length;
   var domain        = "";
@@ -355,36 +400,36 @@ function removeSelectedFromBlackList() {
   for (var i=0; i<len; i++) {
     domain = els[i].innerText;
     encodedDomain = encodeURIComponent(domain);
-    if (blackList[encodedDomain] && domain === "docs.google.com") {
-      blackList[encodedDomain] = 0;
-    } else if (blackList[encodedDomain]) {
-      delete blackList[encodedDomain];
+    if (blockList[encodedDomain] && domain === "docs.google.com") {
+      blockList[encodedDomain] = 0;
+    } else if (blockList[encodedDomain]) {
+      delete blockList[encodedDomain];
     }
     els[i].parentNode.removeChild(els[i]);
   }
 
-  blackListToString(blackList);
+  blockListToString(blockList);
   stripeList("div.row");
 }
 
-function blackListToObject() {
-  chrome.extension.sendMessage({"type" : "getBlackList"}, function (resp) {
-    var flag = (blackList.init) ? 1 : 0;
-    blackList = resp;
+function blockListToObject() {
+  chrome.extension.sendMessage({"type" : "getBlockList"}, function (resp) {
+    var flag = (blockList.init) ? 1 : 0;
+    blockList = resp;
 
     if (flag) {
-      initBlackListDiv(blackList);
+      initBlockListDiv(blockList);
     }
   });
 
-  return(blackList);
+  return(blockList);
 }
 
-function blackListToString(oBlackList) {
-  var blackList = {};
+function blockListToString(oBlockList) {
+  var blockList = {};
 
   chrome.extension.sendMessage({
-    "type" : "writeBlackList", "blackList" : oBlackList}
+    "type" : "writeBlockList", "blockList" : oBlockList}
   );
 }
 
@@ -455,6 +500,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('aoc').addEventListener('click', function() {
       toggleDiv('aocSettings');
     });
+    document.getElementById('nativeAlertOnCopy').addEventListener('click', function() {
+      toggleDiv('nativeAlertOnCopySettings');
+    });
+    document.getElementById('copyDelay').addEventListener('click', function() {
+      toggleDiv('copyDelaySettings');
+    });
+    document.getElementById('clearClipboard').addEventListener('click', function() {
+      toggleDiv('clearClipboardSettings');
+    });
     document.getElementById('iurl').addEventListener('click', function() {
       toggleDiv('diviurlap');
     });
@@ -483,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
       'click', document.getElementById('iurltext').select
     );
     document.getElementById('removeBtn').addEventListener(
-      'click', removeSelectedFromBlackList
+      'click', removeSelectedFromBlockList
     );
     document.getElementById('addBtn').addEventListener(
       'click', function() {
@@ -492,12 +546,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("domaintext").select();
     });
     document.getElementById('addOverlayBtn').addEventListener(
-      'click', addToBlackList
+      'click', addToBlockList
     );
     document.getElementById("domaintext").addEventListener(
       'keyup', function(e) {
         if (e.keyCode == 13) {
-          addToBlackList();
+          addToBlockList();
         }
     });
     document.getElementById('cancelOverlayBtn').addEventListener(

@@ -1,9 +1,14 @@
-var opts = {
+let opts = {
   'init'            : false,
   'mouseDownTarget' : null,
   'mouseStartX'     : 0,
   'mouseStartY'     : 0,
-  'timerId'         : 0
+  'timerId'         : {
+    'w1' : 0,
+    'w2' : 0,
+    'w3' : 0,
+    'w4' : 0,
+  },
 };
 
 //-----------------------------------------------------------------------------
@@ -14,7 +19,7 @@ var opts = {
 chrome.extension.sendMessage(
   { "type" : "config" },
   function (resp) {
-    var key;
+    let key;
     opts.init = true;
 
     for (key in resp) {
@@ -26,22 +31,21 @@ chrome.extension.sendMessage(
     debug("Got opts:");
     debug(opts, true);
 
-    var i;
-    debug("Walk blacklist");
-    for (i in opts.blackList) {
-      debug("  blacklist entry: " + i + " -> " + opts.blackList[i]);
+    debug("Walk blocklist");
+    for (let i in opts.blockList) {
+      debug("  blocklist entry: " + i + " -> " + opts.blockList[i]);
     }
 
-    var arr;
-    var domain;
-    var href = window.location.href;
-    var flag = false;
+    let arr;
+    let domain;
+    let href = window.location.href;
+    let flag = false;
     debug("window.location.href is " + href);
     if (window.location.protocol === "file:") {
       domain = window.location.pathname.match(/^\/([^\/]+)\//)[1];
       if (
-        opts.blackList[encodeURIComponent(href)] ||
-        opts.blackList[encodeURIComponent(domain)]
+        opts.blockList[encodeURIComponent(href)] ||
+        opts.blockList[encodeURIComponent(domain)]
       ) {
         flag = true;
       }
@@ -52,7 +56,7 @@ chrome.extension.sendMessage(
         return;
       }
 
-      if (opts.blackList[encodeURIComponent(href)]) {
+      if (opts.blockList[encodeURIComponent(href)]) {
         domain = href;
         flag   = true;
       } else {
@@ -62,7 +66,7 @@ chrome.extension.sendMessage(
           }
           domain = arr.join(".");
           debug("Domain walk: " + domain);
-          if (opts.blackList[domain] == 1) {
+          if (opts.blockList[domain] == 1) {
             flag = true;
             break;
           }
@@ -91,16 +95,24 @@ chrome.extension.sendMessage(
         false
       );
     } else {
-      debug("URL is blacklisted, disabling: " + domain);
+      debug("URL is blocklisted, disabling: " + domain);
     }
   }
 );
+
+const sleep = ((ms) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+});
 
 function padDigits(n, width, z) {
   width   = width || 2;
   z       = z || 0;
   n       = String(n);
-  var arr = [];
+  let arr = [];
 
   if (n.length >= width) {
     return n;
@@ -138,7 +150,41 @@ function fade(el, speed) {
 function alertOnCopy(e) {
   var el, el1;
 
+  debug("in alertOnCopy");
+  if (opts.nativeAlertOnCopy) {
+    debug("doing native alert");
+    try {
+      s = window.getSelection();
+      text = s.toString();
+      if (opts.trimWhitespace) {
+          text = text.replace(/^\s+|\s+$/g, '');
+          text = text.replace(/[\n\r]+$/g, '');
+      }
+      chrome.extension.sendMessage({
+        "type" : "showNotification",
+        "text" : text,
+        "opts" : opts,
+      });
+
+      if (opts.timerId.w3) {
+        clearTimeout(opts.timerId.w3);
+        opts.timerId.w3 = 0;
+      }
+
+      opts.timerId.w3 = setTimeout(function () {
+        opts.timerId.w3 = 0;
+        chrome.extension.sendMessage({
+          "type" : "hideNotification",
+        });
+      }, 5000);
+    } catch (e) {
+      debug("Caught error: native alert on copy");
+      debug(e, true);
+    }
+  }
+
   if (opts.alertOnCopy) {
+    debug("doing in browser alert");
     el = document.createElement('div');
     el.style.fontSize        = opts.alertOnCopySize;
     el.style.fontFamily      = 'Helvetica, sans-serif';
@@ -184,9 +230,9 @@ function alertOnCopy(e) {
 
     debug("Fade duration: " + duration);
 
-    setTimeout(function () {
+    sleep(duration).then(() => {
       fade(el, 5);
-    }, duration);
+    });
   }
 }
 
@@ -353,6 +399,12 @@ function copyAsPlainText(params) {
       return;
     }
 
+    if (opts.trimWhitespace) {
+        debug("Trimming selectection");
+        text = text.replace(/^\s+|\s+$/g, '');
+        text = text.replace(/[\n\r]+$/g, '');
+    }
+
     debug("Got selectection: " + text);
 
     if (opts.includeUrl) {
@@ -410,37 +462,60 @@ function autoCopyW(e) {
 
   if (opts.pasteOnMiddleClick && e.button === 1) {
     debug("paste requested, calling autoCopy immediately");
-    autoCopy(e);
+    autoCopyW2(e);
   } else if (mouseTravel && e.detail === 1) {
     debug("calling autoCopy immediately");
-    autoCopy(e);
+    autoCopyW2(e);
   } else if (!mouseTravel && e.detail === 1) {
     debug("ignoring click.  No mouse travel and click count is one.");
     return;
   } else if (mouseTravel && e.detail >= 2) {
     debug("double click and drag -- calling autoCopy immediately");
-    autoCopy(e);
+    autoCopyW2(e);
   } else if (!mouseTravel && e.detail >= 3) {
     debug("triple click detected -- calling autoCopy immediately");
-    clearTimeout(opts.timerId);
-    opts.timerId = 0;
-    autoCopy(e);
+    clearTimeout(opts.timerId.w1);
+    opts.timerId.w1 = 0;
+    autoCopyW2(e);
   } else if (!mouseTravel && e.detail == 2) {
     //-------------------------------------------------------------------------
     // We have to wait before calling auto copy when two clicks are 
     // detected to see if there is going to be a triple click.
     //-------------------------------------------------------------------------
-    debug("timerId? " + opts.timerId);
-    if (!opts.timerId) {
+    debug("timerId? " + opts.timerId.w1);
+    if (!opts.timerId.w1) {
       debug(
         "Setting timer to call autoCopy -- need to wait and see if there " +
         "is a triple click."
       );
-      opts.timerId = setTimeout(function () {
-        opts.timerId = 0;
-        autoCopy(e);
+      opts.timerId.w1 = setTimeout(function () {
+        opts.timerId.w1 = 0;
+        autoCopyW2(e);
       }, 500);
     }
+  }
+}
+
+//-----------------------------------------------------------------------------
+// This implements a copy delay
+//-----------------------------------------------------------------------------
+function autoCopyW2(e) {
+  if (opts.copyDelay && opts.copyDelayWait >= 0) {
+    debug("Copy delay in effect, waiting " + opts.copyDelayWait + " seconds");
+    let duration = parseFloat(opts.copyDelayWait) * 1000;
+    debug("Copy delay: timerId? " + opts.timerId.w2);
+    if (opts.timerId.w2) {
+      debug("Copy delay: clearing timer");
+      clearTimeout(opts.timerId.w2);
+    }
+    debug("Copy delay: setting timer to call autoCopy");
+    opts.timerId.w2 = setTimeout(function () {
+      opts.timerId.w2 = 0;
+      autoCopy(e);
+    }, duration);
+  } else {
+    debug("Copy delay disabled");
+    autoCopy(e);
   }
 }
 
@@ -501,6 +576,7 @@ function autoCopy(e) {
   var nodeTypes       = { 'input' : false, 'editable' : false };
   var inputElement    = false;
   var editableElement = false;
+  var duration;
 
   if (
     opts.mouseDownTarget &&
@@ -668,7 +744,12 @@ function autoCopy(e) {
       // adding to what's on the clipboard in background.js
       //-----------------------------------------------------------------------
       rv = document.execCommand("copy");
-      if (rv) {
+      if (opts.trimWhitespace) {
+        debug("Falling back to plain text copy (0x1)");
+        opts.copyAsPlainText = true;
+        copyAsPlainText({ 'event' : e });
+        opts.copyAsPlainText = false;
+      } else if (rv) {
         text = includeComment({
           'text'  : text,
           'merge' : false,
@@ -681,7 +762,7 @@ function autoCopy(e) {
           "opts"    : opts
         });
       } else {
-        debug("Falling back to plain text copy");
+        debug("Falling back to plain text copy (0x2)");
         opts.copyAsPlainText = true;
         copyAsPlainText({ 'event' : e });
         opts.copyAsPlainText = false;
@@ -694,8 +775,8 @@ function autoCopy(e) {
       //-----------------------------------------------------------------------
       rv = document.execCommand("copy");
       debug("copied: " + rv);
-      if (!rv) {
-        debug("Falling back to plain text copy");
+      if (opts.trimWhitespace || !rv) {
+        debug("Falling back to plain text copy (0x3)");
         opts.copyAsPlainText = true;
         copyAsPlainText({ 'event' : e });
         opts.copyAsPlainText = false;
@@ -709,6 +790,23 @@ function autoCopy(e) {
   if (opts.removeSelectionOnCopy) {
     debug("Removing selection");
     s.removeAllRanges();
+  }
+
+  if (opts.clearClipboard) {
+    if (opts.timerId.w4) {
+      clearTimeout(opts.timerId.w4);
+      opts.timerId.w4 = 0;
+    }
+
+    duration = parseFloat(opts.clearClipboardWait) * 1000;
+    debug("Setting timer to clear clipboard: " + duration);
+    opts.timerId.w4 = setTimeout(function () {
+      opts.timerId.w4 = 0;
+      debug("Clearing clipboard");
+      chrome.extension.sendMessage({
+        "type" : "clearClipboard",
+      });
+    }, duration);
   }
 
   return;

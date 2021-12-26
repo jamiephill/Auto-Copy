@@ -1,3 +1,9 @@
+var notify = 0;
+chrome.notifications.onClosed.addListener(function () {
+  notify = 0;
+  chrome.notifications.clear('AutoCopy');
+});
+
 chrome.extension.onMessage.addListener(
   function (req, sender, callback) {
     var rv, el, text, resp = {}, opts = {}, key;
@@ -26,15 +32,22 @@ chrome.extension.onMessage.addListener(
         'includeUrlText'                : '$crlfCopied from: $title - <$url>',
         'includeUrlCommentCountEnabled' : false,
         'includeUrlCommentCount'        : 5,
-        'blackList'                     : blackListToObject(),
-        'enableDebug'                   : false
+        'blockList'                     : blockListToObject(),
+        'enableDebug'                   : false,
+        'copyDelay'                     : false,
+        'copyDelayWait'                 : 5,
+        'clearClipboard'                : false,
+        'clearClipboardWait'            : 10,
+        'trimWhitespace'                : false,
+        'nativeAlertOnCopy'             : false,
+        'nativeAlertOnCopySound'        : false,
       };
 
       if (window.localStorage != null) {
 	for (key in opts) {
 	  if (opts.hasOwnProperty(key)) {
-	    if (key === 'blackList') {
-              resp[key] = blackListToObject();
+	    if (key === 'blockList') {
+              resp[key] = blockListToObject();
 	    } else if (key === 'ctrlToDisableKey' || key === 'ctrlState') {
               resp[key] = window.localStorage[key] || opts[key];
 	    } else if (key === 'includeUrlCommentCount') {
@@ -48,7 +61,9 @@ chrome.extension.onMessage.addListener(
               key === 'alertOnCopyLocation' ||
               key === 'altToCopyAsLinkModifier' ||
               key === 'includeUrlToggleModifier' ||
-              key === 'includeUrlToggleState'
+              key === 'includeUrlToggleState' ||
+              key === 'copyDelayWait' ||
+              key === 'clearClipboardWait'
             ) {
 	      resp[key] = window.localStorage[key] || opts[key];
 	    } else if (key === 'includeUrlText') {
@@ -67,6 +82,54 @@ chrome.extension.onMessage.addListener(
       } else {
         callback(opts);
       }
+    } else if (req.type === "hideNotification") {
+      chrome.notifications.onClosed.dispatch();
+    } else if (req.type === "showNotification") {
+      if (notify) {
+        chrome.notifications.update(
+          'AutoCopy', {
+            'title'    : 'AutoCopy',
+            'message'  : req.text,
+            'type'     : 'basic',
+            'iconUrl'  : 'assets/autoCopy-128.png',
+            'priority' : 1,
+            'silent'   : (req.opts.nativeAlertOnCopySound) ? false : true,
+          },
+          (id) => { 
+            if (chrome.runtime.lastError) {
+              console.log("Last error: ", id, chrome.runtime.lastError);
+            }
+          }
+        );
+      } else {
+        chrome.notifications.create(
+          'AutoCopy', {
+            'title'    : 'AutoCopy',
+            'message'  : req.text,
+            'type'     : 'basic',
+            'iconUrl'  : 'assets/autoCopy-128.png',
+            'priority' : 1,
+            'silent'   : (req.opts.nativeAlertOnCopySound) ? false : true,
+          },
+          (id) => { 
+            if (chrome.runtime.lastError) {
+              console.log("Last error: ", id, chrome.runtime.lastError);
+            }
+          }
+        );
+      }
+      notify = 1;
+    } else if (req.type === "clearClipboard") {
+      el = document.createElement('textarea');
+      document.body.appendChild(el);
+      //-----------------------------------------------------------------------
+      // Setting a null value will cause the clipboard to appear empty
+      //-----------------------------------------------------------------------
+      el.value = "\0";
+      el.select();
+      var rv = document.execCommand("copy");
+      //console.log("Copy: " + rv);
+      document.body.removeChild(el);
     } else if (req.type === "includeComment") {
         el = document.createElement('div');
 	el.contentEditable='true';
@@ -87,6 +150,10 @@ chrome.extension.onMessage.addListener(
         document.body.removeChild(el);
     } else if (req.type === "asLink") {
       if (req.text && req.text.length > 0) {
+        if (opts.trimWhitesapce) {
+          req.text = req.text.replace(/^\s+|\s+$/g, '');
+          req.text = req.text.replace(/[\n\r]+$/g, '');
+        }
         el = document.createElement('div');
 	el.innerHTML = '<a title="' + req.title + '" href="' + req.href + 
           '">' + req.text + '</a>';
@@ -102,9 +169,14 @@ chrome.extension.onMessage.addListener(
       if (req.text && req.text.length > 0) {
         el = document.createElement('textarea');
         document.body.appendChild(el);
+        if (opts.trimWhitesapce) {
+          req.text = req.text.replace(/^\s+|\s+$/g, '');
+          req.text = req.text.replace(/[\n\r]+$/g, '');
+        }
         el.value = req.text;
+        //console.log("textArea value: '" + req.text + "'");
         el.select();
-        //console.log("textArea value: " + el.value);
+
         rv = document.execCommand("copy");
         //console.log("Copy: " + rv);
         document.body.removeChild(el);
@@ -119,47 +191,55 @@ chrome.extension.onMessage.addListener(
       rv = el.value
       document.body.removeChild(el);
       callback(rv);
-    } else if (req.type === "getBlackList") {
-      callback(blackListToObject());
-    } else if (req.type === "writeBlackList") {
-      blackListToString(req.blackList);
+    } else if (req.type === "getBlockList") {
+      callback(blockListToObject());
+    } else if (req.type === "writeBlockList") {
+      storeBlockList(req.blockList);
     }
   }
 );
 
-function blackListToString(oBlackList) {
+function storeBlockList(oBlockList) {
   var arr = [];
-  for (var n in oBlackList) {
-    arr.push(n + ":" + oBlackList[n]);
+  for (var n in oBlockList) {
+    arr.push(n + ":" + oBlockList[n]);
   }
 
-  window.localStorage.blackList = arr.join(",");
+  window.localStorage.blockList = arr.join(",");
 }
 
-function blackListToObject() {
-  var oBlackList = {};
+function blockListToObject() {
+  var oBlockList = {};
 
-  if (!window.localStorage.blackList) {
-    //console.log("setting blacklist for first time");
-    window.localStorage.blackList = "docs.google.com:1";
+  //---------------------------------------------------------------------------
+  //  Temporary while we convert to a new name
+  //---------------------------------------------------------------------------
+  if (window.localStorage.blackList) {
+    window.localStorage.blockList = window.localStorage.blockList;
+    delete window.localStorage.blackList;
   }
 
-  var domains    = window.localStorage.blackList.split(",");
+  if (!window.localStorage.blockList) {
+    //console.log("setting blocklist for first time");
+    window.localStorage.blockList = "docs.google.com:1";
+  }
+
+  var domains    = window.localStorage.blockList.split(",");
   var len        = domains.length
   var parts      = [];
   var i;
 
-  //console.log("In blackListToObject");
+  //console.log("In blockListToObject");
   for (i=0; i<len; i++) {
     parts = domains[i].split(":");
 
-    oBlackList[parts[0]] = parseInt(parts[1],10);
+    oBlockList[parts[0]] = parseInt(parts[1],10);
   }
 
-  //console.log("Walking blacklist");
-  //for (i in oBlackList) {
-  //  console.log("  Blacklist entry: " + i + " -> " + oBlackList[i]);
+  //console.log("Walking blocklist");
+  //for (i in oBlockList) {
+  //  console.log("  Blocklist entry: " + i + " -> " + oBlockList[i]);
   //}
 
-  return(oBlackList);
+  return(oBlockList);
 }

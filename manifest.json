@@ -1,19 +1,23 @@
 {
   "name"                    : "Auto Copy",
   "description"             : "Automatically copy selected text to the clipboard. Has many configurable options for controlling the behavior.",
-  "version"                 : "4.1.7",
+  "version"                 : "4.2.0",
   "icons"                   : {
     "128" : "assets/autoCopy-128.png"
   },
   "manifest_version" : 2,
   "content_security_policy" : "style-src 'unsafe-inline'; default-src 'self'",
   "minimum_chrome_version"  : "22",
-  "options_page"            : "html/options.html",
+  "options_ui"              : {
+    "page"        : "html/options.html",
+    "open_in_tab" : true
+  },
   "background"              : {
     "scripts"    : ["js/background.js"],
     "persistent" : false
   },
   "permissions"             : [
+    "notifications",
     "clipboardRead",
     "clipboardWrite"
   ],
