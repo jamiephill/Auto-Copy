@@ -40,6 +40,7 @@ chrome.extension.sendMessage(
     let domain;
     let href = window.location.href;
     let flag = false;
+    let hostname = window.location.hostname;
     debug("window.location.href is " + href);
     if (window.location.protocol === "file:") {
       domain = window.location.pathname.match(/^\/([^\/]+)\//)[1];
@@ -49,8 +50,22 @@ chrome.extension.sendMessage(
       ) {
         flag = true;
       }
+    } else if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '[::1]'
+    ) {
+      domain = hostname;
+      if (
+        opts.blockList[domain] == 1 ||
+        opts.blockList['localhost'] == 1 ||
+        opts.blockList['127.0.0.1'] == 1 ||
+        opts.blockList['[::1]'] == 1
+      ) {
+        flag = true;
+      }
     } else {
-      arr  = window.location.hostname.split(".");
+      arr  = hostname.split(".");
       if (arr.length <= 0) {
         debug("window.location.hostname is empty");
         return;
