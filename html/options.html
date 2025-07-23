@@ -1,10 +1,7 @@
 <html>
   <head>
     <title>Auto Copy: Options</title>
-
-    <!--<script src="/js/jquery.tools.min.js"></script>-->
     <script type="text/javascript" src="/js/options.js"></script>
-
     <link rel="stylesheet" href="/css/options.css" type="text/css">
   </head>
 
@@ -16,9 +13,11 @@
       </div>
     </header>
     <main>
+      <!--
       <div class="savedSettings">
         Any open tabs will need to be reloaded in order for changes to take effect.
       </div>
+      -->
 
       <div class="tabGroup">
         <input type="radio" name="tabGroup1" id="rad1" class="tab1" checked="checked">
@@ -33,26 +32,26 @@
         <br>
 
         <div class="tab tab1">
-          <input class="autosave" type="checkbox" id="aoc"> <label for="aoc">Alert on copy &ndash; in browser notification</label>
-          <div id="aocSettings" class="indent">
+          <input class="autosave" type="checkbox" id="alertOnCopy"> <label for="alertOnCopy">Alert on copy &ndash; in browser notification</label>
+          <div id="alertOnCopySettings" class="indent">
             <div>
               <span class="label">Size:</span>
               <span id="bigger">&#9650;</span>
               <span id="smaller">&#9660;</span>
-              <div id="aocs">Auto Copied</div>
+              <div id="alertOnCopySize">Auto Copied</div>
               <span class="note">(Note: Click up/down arrows to change the size)</span>
             </div>
 
             <div>
               <span class="label">Duration:</span>
-              <input class="autosave" type="tel" id="aocd" value=".75" maxlength="5"> <span class="note">(Note: This is how long in seconds the notification will be shown)</span>
+              <input class="autosave" type="tel" id="alertOnCopyDuration" value="" maxlength="3"> <span class="note">(Note: This is how long in seconds the notification will be shown)</span>
             </div>
-            <div class="aocLocation">
+            <div class="alertOnCopyLocation">
               <span class="label">Location:</span>
-              <input class="autosave" type="radio" id="aocltl" name="aocLocation" value="topLeft"><label for="aocltl">Top Left Corner</label>
-              <input class="autosave" type="radio" id="aocltr" name="aocLocation" value="topRight"><label for="aocltr">Top Right Corner</label>
-              <input class="autosave" type="radio" id="aoclbl" name="aocLocation" value="bottomLeft"><label for="aoclbl">Bottom Left Corner</label>
-              <input class="autosave" type="radio" id="aoclbr" name="aocLocation" value="bottomRight" checked><label for="aoclbr">Bottom Right Corner</label>
+              <input class="autosave" type="radio" id="alertOnCopyTopLeft" name="aocLocation" value="TopLeft"><label for="alertOnCopyTopLeft">Top Left Corner</label>
+              <input class="autosave" type="radio" id="alertOnCopyTopRight" name="aocLocation" value="TopRight"><label for="alertOnCopyTopRight">Top Right Corner</label>
+              <input class="autosave" type="radio" id="alertOnCopyBottomLeft" name="aocLocation" value="BottomLeft"><label for="alertOnCopyBottomLeft">Bottom Left Corner</label>
+              <input class="autosave" type="radio" id="alertOnCopyBottomRight" name="aocLocation" value="BottomRight" checked><label for="alertOnCopyBottomRight">Bottom Right Corner</label>
             </div>
           </div>
           <br>
@@ -61,17 +60,18 @@
             <input class="autosave" type="checkbox" id="nativeAlertOnCopySound" name="nativeAlertOnCopySound"> <label for="nativeAlertOnCopySound">Play sound <span class="note">(Note: may not work on all operating systems)</span></label>
           </div>
           <br>
-          <input class="autosave" type="checkbox" id="rsoc"> <label for="rsoc">Remove selection on copy</label>
+          <input class="autosave" type="checkbox" id="removeSelectionOnCopy"> <label for="removeSelectionOnCopy">Remove selection on copy</label>
           <br>
-          <input class="autosave" type="checkbox" id="eitb"> <label for="eitb">Enable in text boxes</label>
+          <input class="autosave" type="checkbox" id="enableForTextBoxes"> <label for="enableInTextBoxes">Enable in text boxes</label>
           <br>
-          <input class="autosave" type="checkbox" id="eice"> <label for="eice">Enable in content editable elements</label>
+          <input class="autosave" type="checkbox" id="enableForContentEditable"> <label for="enableInContentEditable">Enable in content editable elements</label>
+          <!--
           <br>
-          <!---->
-          <input class="autosave" type="checkbox" id="pomc"> <label for="pomc">Paste on middle click</label>
+          <input class="autosave" type="checkbox" id="pasteOnMiddleClick"> <label for="pasteOnMiddleClick">Paste on middle click</label>
+          -->
           <br>
-          <input class="autosave" type="checkbox" id="dc"> <label for="dc">
-                  Press <select class="select-css modifierKey autosave" id="dck">
+          <input class="autosave" type="checkbox" id="ctrlToDisable"> <label for="ctrlToDisable">
+                  Press <select class="select-css modifierKey autosave" id="ctrlToDisableKey">
                     <option id="ctrl" value="ctrl">CTRL</option>
                     <option id="shift" value="shift">Shift</option>
                     <option id="alt" value="alt">ALT</option>
@@ -80,14 +80,14 @@
                     <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
                     <option id="altshift" value="altshift">ALT-Shift</option>
                   </select>
-                  key while selecting to <select class="select-css autosave" id="acs">
+                  key while selecting to <select class="select-css autosave" id="ctrlState">
                     <option value="enable">enable</option>
                     <option value="disable">disable</option>
                   </select> Auto Copy
           </label>
           <br>
-          <input class="autosave" type="checkbox" id="acal"> <label for="acal">
-            Press <select class="select-css modifierKey autosave" id="acalo">
+          <input class="autosave" type="checkbox" id="altToCopyAsLink"> <label for="altToCopyAsLink">
+            Press <select class="select-css modifierKey autosave" id="altToCopyAsLinkModifier">
                     <option id="ctrl" value="ctrl">CTRL</option>
                     <option id="shift" value="shift">Shift</option>
                     <option id="alt" value="alt">ALT</option>
@@ -97,16 +97,26 @@
                     <option id="altshift" value="altshift">ALT-Shift</option>
                   </select> to copy as HTML link</label>
           <br>
-          <input class="autosave" type="checkbox" id="cal"> <label for="cal">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
+          <input class="autosave" type="checkbox" id="copyAsLink"> <label for="copyAsLink">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
           <br>
-          <input class="autosave" type="checkbox" id="capt"> <label for="capt">Copy without formatting</label>
+          <input class="autosave" type="checkbox" id="copyAsPlainText"> <label for="copyAsPlainText">Copy without formatting</label>
           <br>
           <input class="autosave" type="checkbox" name="trimWhitespace" id="trimWhitespace"> <label for="trimWhitespace">Remove whitespace from the begining and ending of selection <span class="note">(Note: this option will remove formatting)</span></label>
           <br>
-          <input class="autosave" type="checkbox" id="iurl"> <label for="iurl">Include an informational comment</label>
-          <div id="diviurlap" class="indent">
-            <input class="autosave" type="checkbox" name="iurlemod" id="iurlemod"> <label for="iurlemod">
-              Press <select class="select-css modifierKey autosave" id="iurlmod">
+          <input class="autosave" type="checkbox" name="copyDelay" id="copyDelay"> <label for="copyDelay">Copy delay</label>
+          <div id="copyDelaySettings" class="indent">
+            Delay: <input class="autosave" type="tel" name="copyDelayWait" id="copyDelayWait" maxlength="3"> <span class="note">(Note: This is how long in seconds to wait before copying the selection)</span>
+          </div>
+          <br>
+          <input class="autosave" type="checkbox" name="clearClipboard" id="clearClipboard"> <label for="clearClipboard">Clear clipboard</label>
+          <div id="clearClipboardSettings" class="indent">
+            Delay: <input class="autosave" type="tel" name="clearClipboardWait" id="clearClipboardWait" maxlength="3"> <span class="note">(Note: This is how long in seconds to wait before clearing the clipboard)</span>
+          </div>
+          <br>
+          <input class="autosave" type="checkbox" id="includeComment"> <label for="includeComment">Include an informational comment</label>
+          <div id="includeCommentSettings" class="indent">
+            <input class="autosave" type="checkbox" name="includeCommentToggle" id="includeCommentToggle"> <label for="includeCommentToggle">
+              Press <select class="select-css modifierKey autosave" id="includeCommentToggleModifier">
                 <option id="ctrl" value="ctrl">CTRL</option>
                 <option id="shift" value="shift">Shift</option>
                 <option id="alt" value="alt">ALT</option>
@@ -115,19 +125,19 @@
                 <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
                 <option id="altshift" value="altshift">ALT-Shift</option>
               </select>
-              key while selecting to <select class="select-css autosave" id="iurlemodstate">
+              key while selecting to <select class="select-css autosave" id="includeCommentToggleState">
                 <option value="enable">enable</option>
                 <option value="disable">disable</option>
               </select> informational comment
             </label>
             <br>
-            <input class="autosave" type="checkbox" name="iurlewc" id="iurlewc"> <label for="iurlewc"><span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="text" maxlength="2" size="1" id="iurlcount" value="5"> words are selected</span></label>
+            <input class="autosave" type="checkbox" name="includeCommentWordCountEnabled" id="includeCommentWordCountEnabled"> <label for="includeCommentWordCountEnabled"><span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="tel" maxlength="2" size="1" id="includeCommentWordCount" value=""> words are selected</span></label>
             <br>
-            <input class="autosave" type="radio" name="iurlap" id="iurlp"> <label for="iurlp">Add the comment to the beginning of the copied text</label>
+            <input class="autosave" type="radio" name="icp" id="includeCommentPrepend"> <label for="includeCommentPrepend">Add the comment to the beginning of the copied text</label>
             <br>
-            <input class="autosave" type="radio" name="iurlap" id="iurla" checked="checked"> <label for="iurla">Add the comment to the end of the copied text</label>
+            <input class="autosave" type="radio" name="icp" id="includeCommentPostpend" checked="checked"> <label for="includeCommentPostpend">Add the comment to the end of the copied text</label>
             <br>
-            Format: <input class="autosave" type="text" size="64" id="iurltext" value="$crlfCopied from: $title - <$url>"> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
+            Format: <input class="autosave" type="text" size="64" id="includeCommentFormat" value=""> <span class="note">(Default: $crlfCopied from: $title - <$url>)</span>
             <div class="indent note larger">
               The comment can contain the following variables:
               <br>
@@ -156,23 +166,14 @@
                 <b>$minute</b> - Inserts current minute
                 <br>
                 <b>$second</b> - Inserts current second
+                <br>
+                <b>$ampm</b> - AM or PM
               </div>
             </div>
-      
-          </div>
-          <br>
-          <input class="autosave" type="checkbox" name="copyDelay" id="copyDelay"> <label for="copyDelay">Copy delay</label>
-          <div id="copyDelaySettings" class="indent">
-            Delay: <input class="autosave" type="tel" name="copyDelayWait" id="copyDelayWait" maxlength="5"> <span class="note">(Note: This is how long in seconds to wait before copying the selection)</span>
-          </div>
-          <br>
-          <input class="autosave" type="checkbox" name="clearClipboard" id="clearClipboard"> <label for="clearClipboard">Clear clipboard</label>
-          <div id="clearClipboardSettings" class="indent">
-            Delay: <input class="autosave" type="tel" name="clearClipboardWait" id="clearClipboardWait" maxlength="5"> <span class="note">(Note: This is how long in seconds to wait before clearing the clipboard)</span>
           </div>
           <br>
           <br>
-          <input class="autosave" type="checkbox" name="debug" id="debug"> <label for="debug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
+          <input class="autosave" type="checkbox" name="debug" id="enableDebug"> <label for="enableDebug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
           <!--
           <button id="saveButton">Save &amp; Close</button>
           -->
@@ -204,7 +205,8 @@
             -->
             <input type="submit" name="paypal" id="paypal"><label for="paypal">Paypal</label>
           </form>
-          
+          Cash App: <a target="_blank" href="https://cash.app?to=$stratusnine">$stratusnine</a>
+
         </div>
         <div class="tab tab4">
           <p><a target="_blank" href="http://stratusnine.com/software/auto-copy/">Auto Copy</a> is a browser extension that will automatically copy any selected text to the clipboard.</p>
@@ -233,7 +235,9 @@
           <h2>Notes</h2>
           <p>The extension works with any URL type, but to support file:/// URLs you must enable this on the extension management page by checking the setting 'Allow access to file URLs'.</p>
 
+          <!--
           <p class="bold">When an option is changed, web pages must be reloaded before the changes will take effect.</p>
+          -->
 
           <h2>Attributions</h2>
           <p>Many thanks to <a href="http://www.ericportfolio.com/">Eric Porter</a> for creating the icon and promotional image.</p>
@@ -257,11 +261,17 @@
     </main>
     <footer>
       <div>
-        <span>v4.2.1</span>
+        <span>v5.0.0</span>
         <span class="separator">.</span>
         <span><a href="https://stratusnine.com/software/auto-copy/auto-copy-privacy-policy/">Privacy Policy</a></span>
       </div>
     </footer>
 
+    <div id="loadingOverlay">
+      <div class="overlay"></div>
+      <div id="loader" class="ui-corner-bl ui-corner-br">Loading
+        <div></div>
+      </div>
+    </div>
   </body>
 </html>
