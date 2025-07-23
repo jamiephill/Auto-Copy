@@ -20,7 +20,6 @@
     "activeTab",
     "clipboardRead",
     "clipboardWrite",
-    // This doesn't work right if we try to specify it as optional_permissions
     "notifications"
   ],
   "host_permissions"        : [
@@ -31,7 +30,6 @@
     "css"        : [],
     "js"         : ["js/autoCopy.js"],
     "run_at"     : "document_end",
-    //"run_at"     : "document_start",
     "all_frames" : true
   }]
 }
