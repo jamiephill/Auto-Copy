@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <title>Auto Copy: Options</title>
     <script type="text/javascript" src="/js/options.js"></script>
@@ -14,9 +15,7 @@
     </header>
     <main>
       <!--
-      <div class="savedSettings">
-        Any open tabs will need to be reloaded in order for changes to take effect.
-      </div>
+        <div class="savedSettings">Any open tabs will need to be reloaded in order for changes to take effect.</div>
       -->
 
       <div class="tabGroup">
@@ -66,38 +65,38 @@
           <br>
           <input class="autosave" type="checkbox" id="enableForContentEditable"> <label for="enableInContentEditable">Enable in content editable elements</label>
           <!--
-          <br>
-          <input class="autosave" type="checkbox" id="pasteOnMiddleClick"> <label for="pasteOnMiddleClick">Paste on middle click</label>
+            <br>
+            <input class="autosave" type="checkbox" id="pasteOnMiddleClick"> <label for="pasteOnMiddleClick">Paste on middle click</label>
           -->
           <br>
           <input class="autosave" type="checkbox" id="ctrlToDisable"> <label for="ctrlToDisable">
-                  Press <select class="select-css modifierKey autosave" id="ctrlToDisableKey">
-                    <option id="ctrl" value="ctrl">CTRL</option>
-                    <option id="shift" value="shift">Shift</option>
-                    <option id="alt" value="alt">ALT</option>
-                    <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
-                    <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
-                    <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
-                    <option id="altshift" value="altshift">ALT-Shift</option>
-                  </select>
-                  key while selecting to <select class="select-css autosave" id="ctrlState">
-                    <option value="enable">enable</option>
-                    <option value="disable">disable</option>
-                  </select> Auto Copy
+            Press <select class="select-css modifierKey autosave" id="ctrlToDisableKey">
+              <option id="ctrl1" value="ctrl">CTRL</option>
+              <option id="shift1" value="shift">Shift</option>
+              <option id="alt1" value="alt">ALT</option>
+              <option id="ctrlalt1" value="ctrlalt">CTRL-ALT</option>
+              <option id="ctrlshift1" value="ctrlshift">CTRL-Shift</option>
+              <option id="ctrlaltshift1" value="ctrlaltshift">CTRL-ALT-Shift</option>
+              <option id="altshift1" value="altshift">ALT-Shift</option>
+            </select>
+            key while selecting to <select class="select-css autosave" id="ctrlState">
+              <option value="enable">enable</option>
+              <option value="disable">disable</option>
+            </select> Auto Copy
           </label>
           <br>
           <input class="autosave" type="checkbox" id="altToCopyAsLink"> <label for="altToCopyAsLink">
             Press <select class="select-css modifierKey autosave" id="altToCopyAsLinkModifier">
-                    <option id="ctrl" value="ctrl">CTRL</option>
-                    <option id="shift" value="shift">Shift</option>
-                    <option id="alt" value="alt">ALT</option>
-                    <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
-                    <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
-                    <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
-                    <option id="altshift" value="altshift">ALT-Shift</option>
-                  </select> to copy as HTML link</label>
+              <option id="ctrl2" value="ctrl">CTRL</option>
+              <option id="shift2" value="shift">Shift</option>
+              <option id="alt2" value="alt">ALT</option>
+              <option id="ctrlalt2" value="ctrlalt">CTRL-ALT</option>
+              <option id="ctrlshift2" value="ctrlshift">CTRL-Shift</option>
+              <option id="ctrlaltshift2" value="ctrlaltshift">CTRL-ALT-Shift</option>
+              <option id="altshift2" value="altshift">ALT-Shift</option>
+            </select> to copy as HTML link</label>
           <br>
-          <input class="autosave" type="checkbox" id="copyAsLink"> <label for="copyAsLink">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</label>
+          <input class="autosave" type="checkbox" id="copyAsLink"> <label for="copyAsLink">Always copy as HTML link <span class="note">(Note: Copy wihtout formatting and Include an information comment cannot be used with Copy as HTML Link and visa versa)</span></label>
           <br>
           <input class="autosave" type="checkbox" id="copyAsPlainText"> <label for="copyAsPlainText">Copy without formatting</label>
           <br>
@@ -117,12 +116,12 @@
           <div id="includeCommentSettings" class="indent">
             <input class="autosave" type="checkbox" name="includeCommentToggle" id="includeCommentToggle"> <label for="includeCommentToggle">
               Press <select class="select-css modifierKey autosave" id="includeCommentToggleModifier">
-                <option id="ctrl" value="ctrl">CTRL</option>
-                <option id="shift" value="shift">Shift</option>
-                <option id="alt" value="alt">ALT</option>
-                <option id="ctrlalt" value="ctrlalt">CTRL-ALT</option>
-                <option id="ctrlshift" value="ctrlshift">CTRL-Shift</option>
-                <option id="ctrlaltshift" value="ctrlaltshift">CTRL-ALT-Shift</option>
+                <option id="ctrl3" value="ctrl">CTRL</option>
+                <option id="shift3" value="shift">Shift</option>
+                <option id="alt3" value="alt">ALT</option>
+                <option id="ctrlalt3" value="ctrlalt">CTRL-ALT</option>
+                <option id="ctrlshift3" value="ctrlshift">CTRL-Shift</option>
+                <option id="ctrlaltshift3" value="ctrlaltshift">CTRL-ALT-Shift</option>
                 <option id="altshift" value="altshift">ALT-Shift</option>
               </select>
               key while selecting to <select class="select-css autosave" id="includeCommentToggleState">
@@ -131,7 +130,7 @@
               </select> informational comment
             </label>
             <br>
-            <input class="autosave" type="checkbox" name="includeCommentWordCountEnabled" id="includeCommentWordCountEnabled"> <label for="includeCommentWordCountEnabled"><span id="commentCount" >Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="tel" maxlength="2" size="1" id="includeCommentWordCount" value=""> words are selected</span></label>
+            <input class="autosave" type="checkbox" name="includeCommentWordCountEnabled" id="includeCommentWordCountEnabled"> <label for="includeCommentWordCountEnabled"><span id="commentCount">Only include the comment if more than <input class="autosave" title="Valid values are 1 to 99" type="tel" maxlength="2" size="1" id="includeCommentWordCount" value=""> words are selected</span></label>
             <br>
             <input class="autosave" type="radio" name="icp" id="includeCommentPrepend"> <label for="includeCommentPrepend">Add the comment to the beginning of the copied text</label>
             <br>
@@ -175,14 +174,14 @@
           <br>
           <input class="autosave" type="checkbox" name="debug" id="enableDebug"> <label for="enableDebug">Enable console logging <span class="note">(Note: use this for debug purposes to see what auto copy is doing inside the developer console)</span></label>
           <!--
-          <button id="saveButton">Save &amp; Close</button>
+            <button id="saveButton">Save &amp; Close</button>
           -->
-        </div>
+        </div> <!-- .tab1 -->
         <div class="tab tab2">
           <!--
-          <select id="blsel" multiple="multiple" size="5">
+            <select id="blsel" multiple="multiple" size="5">
             <option value="docs.google.com">docs.google.com</option>
-          </select>
+            </select>
           -->
           <div id="blocklist">
           </div>
@@ -193,7 +192,7 @@
             <button id="addBtn">Add New Entry</button>
             <button id="removeBtn">Remove Selected Entries</button>
           </div>
-        </div>
+        </div> <!-- .tab2 -->
         <div class="tab tab3">
           <p>If you like this extension, please consider donating to help support the development effort.  Thanks!</p>
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -201,13 +200,13 @@
             <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
   ">
             <!--
-            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+              <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
             -->
             <input type="submit" name="paypal" id="paypal"><label for="paypal">Paypal</label>
           </form>
           Cash App: <a target="_blank" href="https://cash.app?to=$stratusnine">$stratusnine</a>
 
-        </div>
+        </div> <!-- .tab3 -->
         <div class="tab tab4">
           <p><a target="_blank" href="http://stratusnine.com/software/auto-copy/">Auto Copy</a> is a browser extension that will automatically copy any selected text to the clipboard.</p>
 
@@ -215,6 +214,7 @@
           <p>Auto Copy has several features that are configurable from the settings tab:</p>
 
           <ul>
+            <li>Sync settings across browsers</li>
             <li>Notification on copy</li>
             <li>Remove selection on copy</li>
             <li>Enable / disable in text boxes</li>
@@ -236,16 +236,16 @@
           <p>The extension works with any URL type, but to support file:/// URLs you must enable this on the extension management page by checking the setting 'Allow access to file URLs'.</p>
 
           <!--
-          <p class="bold">When an option is changed, web pages must be reloaded before the changes will take effect.</p>
+            <p class="bold">When an option is changed, web pages must be reloaded before the changes will take effect.</p>
           -->
 
           <h2>Attributions</h2>
           <p>Many thanks to <a href="http://www.ericportfolio.com/">Eric Porter</a> for creating the icon and promotional image.</p>
 
           <h2>Contact</h2>
-          <p>If you have a feature request, bug fix, or general feedback please feel free to get in touch with me on <a target="_blank" href="mailto:autocopy@jamiehill.com">email</a>.
-        </div>
-      </div>
+          <p>If you have a feature request, bug fix, or general feedback please feel free to get in touch with me on <a target="_blank" href="mailto:autocopy@jamiehill.com">email</a>.</p>
+        </div> <!-- .tab4 -->
+      </div> <!-- tabGroup -->
       <div id="overlay">
         <div>
           <input type="radio" name="blocklistType" id="blocklistDomain" checked="checked"> <label for="blocklistDomain">Blocklist web site</label>

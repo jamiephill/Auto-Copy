@@ -1,0 +1,33 @@
+{
+  "name": "Auto Copy",
+  "version": "5.0.0",
+  "description": "Auto Copy is an extension for [Chrome](https://www.google.com/chrome/) and [Edge web](https://www.microsoft.com/en-us/edge) browsers. It will automatically copy any selected text to the clipboard.",
+  "main": "js/autoCopy.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lintFile": "eslint $*",
+    "lintFix": "eslint --fix ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamiephill/Auto-Copy.git"
+  },
+  "keywords": [],
+  "author": "Jamie Hill <autocopy@jamiehill.com>",
+  "license": "GPL-3.0",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jamiephill/Auto-Copy/issues"
+  },
+  "homepage": "https://github.com/jamiephill/Auto-Copy#readme",
+  "devDependencies": {
+    "@eslint/css": "^0.10.0",
+    "@eslint/js": "^9.31.0",
+    "@eslint/json": "^0.13.1",
+    "@html-eslint/eslint-plugin": "^0.43.1",
+    "@html-eslint/parser": "^0.43.0",
+    "@stylistic/eslint-plugin": "^5.2.2",
+    "eslint": "^9.32.0",
+    "globals": "^16.3.0"
+  }
+}

@@ -1,26 +1,26 @@
-"use strict"
+"use strict";
 
-let opts = {
-  'mouseDownTarget'      : null,
-  'mouseStartX'          : 0,
-  'mouseStartY'          : 0,
-  'timerId'              : {
-    'tripleClick'    : 0,
-    'autoCopyDelay'  : 0,
-    'nativeAlert'    : 0,
-    'clearClipboard' : 0,
+const opts = {
+  mouseDownTarget: null,
+  mouseStartX: 0,
+  mouseStartY: 0,
+  timerId: {
+    tripleClick: 0,
+    autoCopyDelay: 0,
+    nativeAlert: 0,
+    clearClipboard: 0,
   },
-  'blockListSiteEnabled' : false,
-  'blockList'            : {},
-  //'enableDebug' : true,
+  blockListSiteEnabled: false,
+  blockList: {},
+  //enableDebug: false,
 };
 
 const debug = ((...args) => {
   if (opts.enableDebug) {
-    if (args[0] === 'Offscreen' || args[0] === 'ServiceWorker') {
+    if (args[0] === "Offscreen" || args[0] === "ServiceWorker") {
       args[0] === `Auto-Copy (${args[0]})`;
     } else {
-      args.unshift('Auto-Copy (ContentScript):');
+      args.unshift("Auto-Copy (ContentScript):");
     }
     console.log.apply(null, args);
   }
@@ -30,26 +30,26 @@ const debug = ((...args) => {
 // Monitor config options for changes and update them accordingly
 //-----------------------------------------------------------------------------
 chrome.storage.onChanged.addListener((obj, area) => {
-  if (area === 'sync') {
+  if (area === "sync") {
     debug(`sync storage changed`, obj);
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       opts[key] = obj[key].newValue;
       //-----------------------------------------------------------------------
       // If blockList changes then we need to re-evaluate the page we're on
       // to see if it should be enabled/disabled based on the changes.
       //-----------------------------------------------------------------------
-      if (key === 'blockList') {
-        let pbl = processBlocklist();
+      if (key === "blockList") {
+        const pbl = processBlocklist();
         debug(`pbl response ${opts.blockListSiteEnabled}:`, pbl);
         if (pbl.enable && !opts.blockListSiteEnabled) {
           addListeners(pbl.domain);
         } else if (!pbl.enable && opts.blockListSiteEnabled) {
-          debug('got here');
+          debug("got here");
           removeListeners(pbl.domain);
         }
       }
     });
-    debug('New Opts: ', opts);
+    debug("New Opts: ", opts);
   }
 });
 
@@ -57,47 +57,51 @@ chrome.storage.onChanged.addListener((obj, area) => {
 // Load options from storage and then setup the content script for the newly
 // loaded page.
 //-----------------------------------------------------------------------------
-chrome.storage.sync.get().then(obj => {
-  Object.keys(obj).forEach(key => {
+chrome.storage.sync.get().then((obj) => {
+  Object.keys(obj).forEach((key) => {
     opts[key] = obj[key];
   });
   debug(`opts:`, opts);
   loadContentScript();
 });
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+/*chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {*/
+chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "log") {
     debug(msg.target, ...msg.data);
   }
 });
 
 const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 const pad = ((string, width, fill) => {
-  width   = width || 2;
-  fill    = fill || '0';
-  string  = String(string);
+  width = width || 2;
+  fill = fill || "0";
+  string = String(string);
 
   return string.padStart(width, fill);
 });
 
 const fade = ((el, speed) => {
   if (el.style) {
-    el.style.opacity = '1';
+    el.style.opacity = "1";
   }
-  let timer = setInterval(function () {
-    el.style.opacity = parseFloat(el.style.opacity) - .02;
-    if (el.style.opacity <= 0) {
-      clearInterval(timer);
-      document.body.removeChild(el);
-    }
-  },
-  speed);
+  const timer = setInterval(
+    function () {
+      el.style.opacity = parseFloat(el.style.opacity) - .02;
+      if (el.style.opacity <= 0) {
+        clearInterval(timer);
+        document.body.removeChild(el);
+      }
+    },
+    speed
+  );
 });
 
-const alertOnCopy = ((e) => {
+/*const alertOnCopy = ((e) => {*/
+const alertOnCopy = (() => {
   if (opts.disableAutoCopy) {
     return;
   }
@@ -105,19 +109,19 @@ const alertOnCopy = ((e) => {
   if (opts.nativeAlertOnCopy) {
     debug(`doing native alert`);
     try {
-      let s = window.getSelection();
+      const s = window.getSelection();
       if (!s || !s.toString) {
         return false;
       }
       let text = s.toString();
       if (opts.trimWhitespace) {
-          text = text.replace(/^\s+|\s+$/g, '');
-          text = text.replace(/[\n\r]+$/g, '');
+        text = text.replace(/^\s+|\s+$/g, "");
+        text = text.replace(/[\n\r]+$/g, "");
       }
       sendMessage({
-        "type" : "showNotification",
-        "text" : text,
-        "opts" : opts,
+        type: "showNotification",
+        text: text,
+        opts: opts,
       });
 
       if (opts.timerId.nativeAlert) {
@@ -128,50 +132,50 @@ const alertOnCopy = ((e) => {
       opts.timerId.nativeAlert = setTimeout(function () {
         opts.timerId.nativeAlert = 0;
         sendMessage({
-          "type" : "hideNotification",
+          type: "hideNotification",
         });
       }, 5000);
-    } catch (e) {
-      debug(`Caught error: native alert on copy`, e);
+    } catch (ex) {
+      debug(`Caught error: native alert on copy`, ex);
     }
   }
 
   if (opts.alertOnCopy) {
     debug(`doing in browser alert`);
-    let el = document.createElement('div');
-    el.style.fontSize        = opts.alertOnCopySize;
-    el.style.fontFamily      = 'Helvetica, sans-serif';
-    el.style.fontStyle       = 'normal';
-    el.style.fontWeight      = 'normal';
-    el.style.boxShadow       = '0px 0px 16px 0px #CBCBCB';
-    el.style.border          = '1px solid #D9D900';
-    el.style.zIndex          = '100000001';
-    el.style.textAlign       = 'center';
-    el.style.color           = '#444444';
-    el.style.backgroundColor = '#FFFF5C';
-    el.style.position        = 'fixed';
-    el.style.borderRadius    = '.25em';
-    el.innerHTML             = "Auto Copied";
-    el.style.boxSizing       = 'content-box';
-    el.style.height          = '2em';
-    el.style.lineHeight      = '2em';
-    el.style.width           = '7em';
-    el.style.padding         = '0px';
-    el.style.margin          = '0px';
+    const el = document.createElement("div");
+    el.style.fontSize = opts.alertOnCopySize;
+    el.style.fontFamily = "Helvetica, sans-serif";
+    el.style.fontStyle = "normal";
+    el.style.fontWeight = "normal";
+    el.style.boxShadow = "0px 0px 16px 0px #CBCBCB";
+    el.style.border = "1px solid #D9D900";
+    el.style.zIndex = "100000001";
+    el.style.textAlign = "center";
+    el.style.color = "#444444";
+    el.style.backgroundColor = "#FFFF5C";
+    el.style.position = "fixed";
+    el.style.borderRadius = ".25em";
+    el.innerHTML = "Auto Copied";
+    el.style.boxSizing = "content-box";
+    el.style.height = "2em";
+    el.style.lineHeight = "2em";
+    el.style.width = "7em";
+    el.style.padding = "0px";
+    el.style.margin = "0px";
 
     debug(`location: ${opts.alertOnCopyLocation}`);
-    if (opts.alertOnCopyLocation === 'TopLeft') {
-      el.style.top = '25px';
-      el.style.left  = '25px';
-    } else if (opts.alertOnCopyLocation === 'TopRight') {
-      el.style.top   = '25px';
-      el.style.right = '25px';
-    } else if (opts.alertOnCopyLocation === 'BottomLeft') {
-      el.style.bottom = '25px';
-      el.style.left   = '25px';
+    if (opts.alertOnCopyLocation === "TopLeft") {
+      el.style.top = "25px";
+      el.style.left = "25px";
+    } else if (opts.alertOnCopyLocation === "TopRight") {
+      el.style.top = "25px";
+      el.style.right = "25px";
+    } else if (opts.alertOnCopyLocation === "BottomLeft") {
+      el.style.bottom = "25px";
+      el.style.left = "25px";
     } else {
-      el.style.bottom = '25px';
-      el.style.right  = '25px';
+      el.style.bottom = "25px";
+      el.style.right = "25px";
     }
 
     document.body.appendChild(el);
@@ -200,11 +204,11 @@ const includeComment = ((params) => {
   }
 
   let text;
-  let count   = (params.text.split(/\s+/)).length;
-  let comment = '';
-  let flag    = true;
-  let url     = '';
-  let crlf    = (opts.copyAsPlainText) ? "\n" : "<br>";
+  const count = (params.text.split(/\s+/)).length;
+  let comment = "";
+  let flag = true;
+  let url = "";
+  const crlf = (opts.copyAsPlainText) ? "\n" : "<br>";
 
   debug(
     `Use modifier to ${opts.includeCommentToggleState} comment?`,
@@ -214,7 +218,7 @@ const includeComment = ((params) => {
   if (opts.includeCommentToggle) {
     let tflag = false;
     if (
-      opts.includeCommentToggleState === 'enable' &&
+      opts.includeCommentToggleState === "enable" &&
       modifierKeyActive(params.event, opts.includeCommentToggleModifier)
     ) {
       debug(
@@ -223,7 +227,7 @@ const includeComment = ((params) => {
       );
       tflag = true;
     } else if (
-      opts.includeCommentToggleState === 'disable' &&
+      opts.includeCommentToggleState === "disable" &&
       !modifierKeyActive(params.event, opts.includeCommentToggleModifier)
     ) {
       debug(
@@ -236,10 +240,10 @@ const includeComment = ((params) => {
     if (!tflag) {
       debug(`Ignoring adding comment due to modifier and state`);
       if (params.merge) {
-        return(params.text);
+        return (params.text);
       }
 
-      return('');
+      return ("");
     }
   }
 
@@ -252,11 +256,11 @@ const includeComment = ((params) => {
   }
 
   if (opts.includeComment && opts.includeCommentFormat && flag) {
-    comment = opts.includeCommentFormat ;
+    comment = opts.includeCommentFormat;
     debug(`Format: ${comment}`);
 
-    if (opts.includeCommentFormat.indexOf('$title') >= 0) {
-      comment = comment.replace(/\$title/g, document.title || 'no title');
+    if (opts.includeCommentFormat.indexOf("$title") >= 0) {
+      comment = comment.replace(/\$title/g, document.title || "no title");
     }
 
     if (opts.copyAsPlainText) {
@@ -268,52 +272,52 @@ const includeComment = ((params) => {
         `${window.location.href}</a>`;
     }
 
-    if (opts.includeCommentFormat.indexOf('$url') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$url") >= 0) {
       comment = comment.replace(/\$url/g, url);
     }
 
-    if (opts.includeCommentFormat.indexOf('$crlf') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$crlf") >= 0) {
       comment = comment.replace(/\$crlf/g, crlf);
     }
 
     const date = new Date();
 
-    if (opts.includeCommentFormat.indexOf('$month') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$month") >= 0) {
       comment = comment.replace(/\$month/g, pad(date.getMonth() + 1));
     }
-    if (opts.includeCommentFormat.indexOf('$day') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$day") >= 0) {
       comment = comment.replace(/\$day/g, pad(date.getDate()));
     }
-    if (opts.includeCommentFormat.indexOf('$year') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$year") >= 0) {
       comment = comment.replace(/\$year/g, date.getFullYear());
     }
-    if (opts.includeCommentFormat.indexOf('$24hour') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$24hour") >= 0) {
       comment = comment.replace(/\$24hour/g, pad(date.getHours()));
     }
     if (
-      opts.includeCommentFormat.indexOf('$ampm') >= 0 ||
-      opts.includeCommentFormat.indexOf('$hour') >= 0
+      opts.includeCommentFormat.indexOf("$ampm") >= 0 ||
+      opts.includeCommentFormat.indexOf("$hour") >= 0
     ) {
       let hour = date.getHours();
-      let ampm = 'AM';
+      let ampm = "AM";
       if (hour > 12) {
         hour = hour - 12;
-        ampm = 'PM';
-      } else if (hour == 12) {
-          ampm = 'PM';
-      } else if (hour == 0) {
-          hour = 12;
+        ampm = "PM";
+      } else if (hour === 12) {
+        ampm = "PM";
+      } else if (hour === 0) {
+        hour = 12;
       }
       comment = comment.replace(/\$hour/g, pad(hour));
       comment = comment.replace(/\$ampm/g, ampm);
     }
-    if (opts.includeCommentFormat.indexOf('$minute') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$minute") >= 0) {
       comment = comment.replace(/\$minute/g, pad(date.getMinutes()));
     }
-    if (opts.includeCommentFormat.indexOf('$second') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$second") >= 0) {
       comment = comment.replace(/\$second/g, pad(date.getSeconds()));
     }
-    if (opts.includeCommentFormat.indexOf('$timestamp') >= 0) {
+    if (opts.includeCommentFormat.indexOf("$timestamp") >= 0) {
       const timestamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-` +
         `-${pad(date.getDate())} ${pad(date.getHours())}` +
         `:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
@@ -332,25 +336,25 @@ const includeComment = ((params) => {
       text = comment;
     }
 
-    return(text);
+    return (text);
   }
 
   if (params.merge) {
-    return(params.text);
+    return (params.text);
   }
 
-  return('');
+  return ("");
 });
 
 const copyAsPlainText = ((params) => {
   params = params || {
-    'event' : {}
+    event: {},
   };
 
   debug(`Entering copy as plain text`, params);
 
   try {
-    const s  = window.getSelection();
+    const s = window.getSelection();
     let text = s.toString();
     //-------------------------------------------------------------------------
     // Don't execute the copy if nothing is selected.
@@ -361,24 +365,26 @@ const copyAsPlainText = ((params) => {
     }
 
     if (opts.trimWhitespace) {
-        debug(`Trimming selectection`);
-        text = text.replace(/^\s+|\s+$/g, '');
-        text = text.replace(/[\n\r]+$/g, '');
+      debug(`Trimming selectection`);
+      text = text.replace(/^\s+|\s+$/g, "");
+      text = text.replace(/[\n\r]+$/g, "");
     }
 
     debug(`Got selectection: ${text}`);
 
     if (opts.includeComment) {
       text = includeComment({
-        'text' : text, 'merge' : true, 'event' : params.event
+        text: text,
+        merge: true,
+        event: params.event,
       });
     }
 
     debug(`Sending copy as plain text: ${text}`);
     sendMessage({
-      "type" : "reformat",
-      "opts" : opts,
-      "text" : text,
+      type: "reformat",
+      opts: opts,
+      text: text,
     });
   } catch (ex) {
     debug(`Caught exception: `, ex);
@@ -395,44 +401,44 @@ function sendMessage(obj) {
     // If we detect a fault here then the extension has likely been updated so
     // let's notify the user that the page needs to be reload.
     //-------------------------------------------------------------------------
-    let id = 'autoCopyReloadNotice';
+    const id = "autoCopyReloadNotice";
     if (opts.disableAutoCopy || document.getElementById(id)) {
       return;
     }
     opts.disableAutoCopy = true;
-    const el1  = document.createElement('div');
-    const el = document.createElement('div');
+    const el1 = document.createElement("div");
+    const el = document.createElement("div");
     el1.appendChild(el);
 
-    el.style.top             = '25px';
-    el.style.fontSize        = '14px';
-    el.style.fontFamily      = 'Helvetica, sans-serif';
-    el.style.fontStyle       = 'normal';
-    el.style.fontWeight      = 'normal';
-    el.style.boxShadow       = '0px 0px 16px 0px #CBCBCB';
-    el.style.border          = '1px solid #D9D900';
-    el.style.zIndex          = '100000001';
-    el.style.textAlign       = 'center';
-    el.style.color           = '#444444';
-    el.style.backgroundColor = '#FFFF5C';
-    el.style.position        = 'fixed';
-    el.style.borderRadius    = '.25em';
-    el.innerHTML             = 'Auto-copy has been updated.  The page needs ' +
-      'to be <a style="text-decoration: underline; color: #0000EE; cursor: ' +
-      'pointer" onclick="location.reload()">reloaded</a> in order for it to ' +
-      'work. <a onclick="document.body.removeChild(document.getElementById( ' +
-      `\'${id}\'))" style="cursor: pointer; font-weight: ` +
-      'bold">&nbsp;&times;&nbsp;</a>';
-    el.style.boxSizing       = 'content-box';
-    el.style.height          = 'auto';
-    el.style.width           = 'auto';
-    el.style.padding         = '8px';
-    el.style.margin          = '0px';
+    el.style.top = "25px";
+    el.style.fontSize = "14px";
+    el.style.fontFamily = "Helvetica, sans-serif";
+    el.style.fontStyle = "normal";
+    el.style.fontWeight = "normal";
+    el.style.boxShadow = "0px 0px 16px 0px #CBCBCB";
+    el.style.border = "1px solid #D9D900";
+    el.style.zIndex = "100000001";
+    el.style.textAlign = "center";
+    el.style.color = "#444444";
+    el.style.backgroundColor = "#FFFF5C";
+    el.style.position = "fixed";
+    el.style.borderRadius = ".25em";
+    el.innerHTML = `Auto-copy has been updated.  The page needs ` +
+      `to be <a style="text-decoration: underline; color: #0000EE; cursor: ` +
+      `pointer" onclick="location.reload()">reloaded</a> in order for it to ` +
+      `work. <a onclick="document.body.removeChild(document.getElementById( ` +
+      `'${id}'))" style="cursor: pointer; font-weight: ` +
+      `bold">&nbsp;&times;&nbsp;</a>`;
+    el.style.boxSizing = "content-box";
+    el.style.height = "auto";
+    el.style.width = "auto";
+    el.style.padding = "8px";
+    el.style.margin = "0px";
 
-    el1.id                   = id;
-    el1.style.margin         = '0 auto';
-    el1.style.position       = 'relative';
-    el1.style.left           = '-50px';
+    el1.id = id;
+    el1.style.display = "flex";
+    el1.style["justify-content"] = "center";
+    el1.style["align-items"] = "center";
 
     document.body.appendChild(el1);
   }
@@ -463,8 +469,8 @@ const autoCopyDecideAction = ((e) => {
   );
 
   if (opts.mouseStartX && opts.mouseStartY) {
-    let x = Math.abs(e.x - opts.mouseStartX);
-    let y = Math.abs(e.y - opts.mouseStartY);
+    const x = Math.abs(e.x - opts.mouseStartX);
+    const y = Math.abs(e.y - opts.mouseStartY);
     opts.mouseStartX = 0;
     opts.mouseStartY = 0;
     if (x > 3 || y > 3) {
@@ -492,7 +498,7 @@ const autoCopyDecideAction = ((e) => {
     clearTimeout(opts.timerId.tripleClick);
     opts.timerId.tripleClick = 0;
     autoCopyDelay(e);
-  } else if (!mouseTravel && e.detail == 2) {
+  } else if (!mouseTravel && e.detail === 2) {
     //-------------------------------------------------------------------------
     // We have to wait before calling auto copy when two clicks are
     // detected to see if there is going to be a triple click.
@@ -517,7 +523,7 @@ const autoCopyDecideAction = ((e) => {
 const autoCopyDelay = ((e) => {
   if (opts.copyDelay && opts.copyDelayWait >= 0) {
     debug(`Copy delay in effect, waiting ${opts.copyDelayWait} seconds`);
-    let duration = parseFloat(opts.copyDelayWait) * 1000;
+    const duration = parseFloat(opts.copyDelayWait) * 1000;
     debug(`Copy delay: timerId (autoCopyDelay)? ${opts.timerId.autoCopyDelay}`);
     if (opts.timerId.autoCopyDelay) {
       debug(`Copy delay: clearing timer (autoCopyDelay)`);
@@ -535,19 +541,19 @@ const autoCopyDelay = ((e) => {
 });
 
 const modifierKeyActive = ((e, name) => {
-  if (name === 'ctrl' && e.ctrlKey && !e.shiftKey && !e.altKey) {
+  if (name === "ctrl" && e.ctrlKey && !e.shiftKey && !e.altKey) {
     return true;
-  } else if (name === 'alt' && e.altKey && !e.ctrlKey && !e.shiftKey) {
+  } else if (name === "alt" && e.altKey && !e.ctrlKey && !e.shiftKey) {
     return true;
-  } else if (name === 'shift' && e.shiftKey && !e.ctrlKey && !e.altKey) {
+  } else if (name === "shift" && e.shiftKey && !e.ctrlKey && !e.altKey) {
     return true;
-  } else if (name === 'ctrlalt' && e.ctrlKey && e.altKey && !e.shiftKey) {
+  } else if (name === "ctrlalt" && e.ctrlKey && e.altKey && !e.shiftKey) {
     return true;
-  } else if (name === 'ctrlshift' && e.ctrlKey && e.shiftKey && !e.altKey) {
+  } else if (name === "ctrlshift" && e.ctrlKey && e.shiftKey && !e.altKey) {
     return true;
-  } else if (name === 'ctrlaltshift' && e.ctrlKey && e.shiftKey && e.altKey) {
+  } else if (name === "ctrlaltshift" && e.ctrlKey && e.shiftKey && e.altKey) {
     return true;
-  } else if (name === 'altshift' && e.altKey && e.shiftKey && !e.ctrlKey) {
+  } else if (name === "altshift" && e.altKey && e.shiftKey && !e.ctrlKey) {
     return true;
   }
 
@@ -570,15 +576,15 @@ const modifierKeyActive = ((e, name) => {
 // pages.
 //-----------------------------------------------------------------------------
 const autoCopy = ((e) => {
-  //let nodeTypes       = { 'input' : false, 'editable' : false };
-  let inputElement    = false;
+  //let nodeTypes = { "input" : false, "editable" : false };
+  let inputElement = false;
   let editableElement = false;
 
   if (
     opts.mouseDownTarget &&
     opts.mouseDownTarget.nodeName &&
     (opts.mouseDownTarget.nodeName === "INPUT" ||
-    opts.mouseDownTarget.nodeName === "TEXTAREA")
+      opts.mouseDownTarget.nodeName === "TEXTAREA")
   ) {
     debug(`Mouse down on input element`);
     inputElement = true;
@@ -598,20 +604,19 @@ const autoCopy = ((e) => {
   if (opts.ctrlToDisable) {
     let flag = false;
     if (
-      opts.ctrlState === 'enable' &&
+      opts.ctrlState === "enable" &&
       modifierKeyActive(e, opts.ctrlToDisableKey)
     ) {
-      debug(
-        `Modifier key (${opts.ctrlToDisableKey}) was active; doing copy`
-      );
+      debug(`Modifier key (${opts.ctrlToDisableKey}) was active; doing copy`);
       flag = true;
     }
     if (
-      opts.ctrlState === 'disable' &&
+      opts.ctrlState === "disable" &&
       !modifierKeyActive(e, opts.ctrlToDisableKey)
     ) {
       debug(
-        `Modifier key (${opts.ctrlToDisableKey}) was not active; doing copy`
+        `Modifier key (${opts.ctrlToDisableKey}) was not active;`,
+        `doing copy`
       );
       flag = true;
     }
@@ -623,19 +628,19 @@ const autoCopy = ((e) => {
   }
 
   if (opts.pasteOnMiddleClick && e.button === 1) {
-    let el = e.target;
+    //let el = e.target;
     debug(`autoCopy: detected paste on middle click`);
 
     if (
-      ((e.target.nodeName === "INPUT"
-        || e.target.nodeName === "TEXTAREA")
-      && e.target.type !== "checkbox"
-      && e.target.type !== "radio"
-      && !e.target.disabled
-      && !e.target.readOnly)
-      || e.target.contentEditable === "true"
+      ((e.target.nodeName === "INPUT" ||
+        e.target.nodeName === "TEXTAREA") &&
+        e.target.type !== "checkbox" &&
+        e.target.type !== "radio" &&
+        !e.target.disabled &&
+        !e.target.readOnly) ||
+        e.target.contentEditable === "true"
     ) {
-      let rv = document.execCommand('paste');
+      const rv = document.execCommand("paste");
       debug(`paste rv: ${rv}`);
     } else {
       debug(`${e.target.nodeName} is not editable, cannot perform paste`);
@@ -653,11 +658,12 @@ const autoCopy = ((e) => {
     return;
   }
 
-  const s  = window.getSelection();
+  const s = window.getSelection();
   let text = s.toString();
   debug(
     `selection collapsed? ${s.isCollapsed}; length: ${text.length};`,
-    `selection: ${text}`);
+    `selection: ${text}`
+  );
   if (!inputElement && s.isCollapsed) {
     debug(`No selection, ignoring click`);
     return;
@@ -685,45 +691,45 @@ const autoCopy = ((e) => {
         `${opts.altToCopyAsLinkModifier}`
       );
       sendMessage({
-        'type'  : 'asLink',
-        'text'  : text,
-        'href'  : window.location.href,
-        'title' : document.title,
-        'opts'  : opts,
+        type: "asLink",
+        text: text,
+        href: window.location.href,
+        title: document.title,
+        opts: opts,
       });
     } else if (opts.copyAsPlainText) {
       debug(`performing copy as plain text`);
-      copyAsPlainText({ 'event' : e });
+      copyAsPlainText({ event: e });
     } else if (opts.includeComment) {
       debug(`performing copy with comment: ${text}`);
       //-----------------------------------------------------------------------
       // This is needed to clear the clipboard contents. Otherwise, we'll keep
       // adding to what's on the clipboard in background.js
       //-----------------------------------------------------------------------
-      let rv = document.execCommand("copy");
+      const rv = document.execCommand("copy");
       debug(`copy result: ${rv}`);
       if (opts.trimWhitespace) {
         debug(`Falling back to plain text copy (0x1)`);
         opts.copyAsPlainText = true;
-        copyAsPlainText({ 'event' : e });
+        copyAsPlainText({ event: e });
         opts.copyAsPlainText = false;
       } else if (rv) {
         debug(`before include comment: ${text}`);
         text = includeComment({
-          'text'  : text,
-          'merge' : false,
-          'event' : e
+          text: text,
+          merge: false,
+          event: e,
         });
         debug(`Got comment: ` + text);
         sendMessage({
-          "type"    : "includeComment",
-          "comment" : text,
-          "opts"    : opts,
+          type: "includeComment",
+          comment: text,
+          opts: opts,
         });
       } else {
         debug(`Falling back to plain text copy (0x2)`);
         opts.copyAsPlainText = true;
-        copyAsPlainText({ 'event' : e });
+        copyAsPlainText({ event: e });
         opts.copyAsPlainText = false;
       }
     } else {
@@ -732,12 +738,12 @@ const autoCopy = ((e) => {
       // This is needed to clear the clipboard contents. Otherwise, we'll keep
       // adding to what's on the clipboard in background.js
       //-----------------------------------------------------------------------
-      let rv = document.execCommand("copy");
+      const rv = document.execCommand("copy");
       debug(`copied: ${rv}`);
       if (opts.trimWhitespace || !rv) {
         debug(`Falling back to plain text copy (0x3)`);
         opts.copyAsPlainText = true;
-        copyAsPlainText({ 'event' : e });
+        copyAsPlainText({ event: e });
         opts.copyAsPlainText = false;
       }
     }
@@ -757,13 +763,13 @@ const autoCopy = ((e) => {
       opts.timerId.clearClipboard = 0;
     }
 
-    let duration = parseFloat(opts.clearClipboardWait) * 1000;
+    const duration = parseFloat(opts.clearClipboardWait) * 1000;
     debug(`Setting timer to clear clipboard: ${duration}`);
-    opts.timerId.clearClipboard= setTimeout(function () {
-      opts.timerId.clearClipboard= 0;
+    opts.timerId.clearClipboard = setTimeout(function () {
+      opts.timerId.clearClipboard = 0;
       debug(`Clearing clipboard`);
       sendMessage({
-        "type" : "clearClipboard",
+        type: "clearClipboard",
       });
     }, duration);
   }
@@ -771,7 +777,7 @@ const autoCopy = ((e) => {
   return;
 });
 
-const mouseTracking = (e => {
+const mouseTracking = ((e) => {
   debug(`Setting mouse start: X(start)=${e.x}; Y(start)=${e.y}`);
   opts.mouseStartX = e.x;
   opts.mouseStartY = e.y;
@@ -780,18 +786,17 @@ const mouseTracking = (e => {
 
 function processBlocklist() {
   debug(`Walk blocklist`);
-  Object.keys(opts.blockList).forEach(key => {
+  Object.keys(opts.blockList).forEach((key) => {
     debug(`  blocklist entry: ${key} ->  ${opts.blockList[key]}`);
   });
 
-  let arr;
   let domain;
-  let href = window.location.href;
+  const href = window.location.href;
   let flag = false;
-  let hostname = window.location.hostname;
+  const hostname = window.location.hostname;
   debug(`window.location.href is ${href}`);
   if (window.location.protocol === "file:") {
-    domain = window.location.pathname.match(/^\/([^\/]+)\//)[1];
+    domain = window.location.pathname.match(/^\/([^/]+)\//)[1];
     if (
       opts.blockList[encodeURIComponent(href)] ||
       opts.blockList[encodeURIComponent(domain)]
@@ -799,74 +804,77 @@ function processBlocklist() {
       flag = true;
     }
   } else if (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '[::1]'
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]"
   ) {
     domain = hostname;
     if (
-      opts.blockList[domain] == 1 ||
-      opts.blockList['localhost'] == 1 ||
-      opts.blockList['127.0.0.1'] == 1 ||
-      opts.blockList['[::1]'] == 1
+      opts.blockList[domain] === 1 ||
+      //-----------------------------------------------------------------------
+      // FIXME - Are these really needed since we're testing above?
+      //-----------------------------------------------------------------------
+      opts.blockList["localhost"] === 1 ||
+      opts.blockList["127.0.0.1"] === 1 ||
+      opts.blockList["[::1]"] === 1
     ) {
       flag = true;
     }
   } else {
-    arr  = hostname.split(".");
-    if (arr.length <= 0) {
+    const fqdnParts = hostname.split(".");
+    if (fqdnParts.length <= 0) {
       debug(`window.location.hostname is empty`);
       return;
     }
 
     if (opts.blockList[encodeURIComponent(href)]) {
       domain = href;
-      flag   = true;
+      flag = true;
     } else {
-      for (let i in arr) {
+      fqdnParts.forEach(() => {
         //---------------------------------------------------------------------
         // stop processing if we get down to the TLD (stratusnine.com)
         //---------------------------------------------------------------------
-        if (arr.length < 2) {
-          break;
+        if (fqdnParts.length < 2) {
+          return false;
         }
-        domain = arr.join(".");
+        domain = fqdnParts.join(".");
         debug(`Domain walk: ${domain}`);
-        if (opts.blockList[domain] == 1) {
+        if (opts.blockList[domain] === 1) {
           flag = true;
-          break;
+          return false;
         }
-        arr.shift();
-      }
+        fqdnParts.shift();
+      });
     }
   }
 
   if (!domain) {
-    debug(`Domain is undefined: ${window.location.href}`);
+    debug(`Domain is undefined: ${window.location.href} / ${hostname}`);
   }
 
-  return({
-    'enable' : !flag,
-    'domain' : domain,
+  return ({
+    enable: !flag,
+    domain: domain,
   });
 }
 
 function addListeners(domain) {
   debug(`Extension enabled for ${domain}`, document);
   opts.blockListSiteEnabled = true;
-  document.addEventListener('mouseup', autoCopyDecideAction, false);
-  document.addEventListener('mousedown', mouseTracking, false)
+  document.addEventListener("mouseup", autoCopyDecideAction, false);
+  document.addEventListener("mousedown", mouseTracking, false);
 }
 
 function removeListeners(domain) {
   debug(`Extension disabled for ${domain}`, document);
   opts.blockListSiteEnabled = false;
   document.removeEventListener("mouseup", autoCopyDecideAction, false);
-  document.removeEventListener('mousedown', mouseTracking, false)
+  document.removeEventListener("mousedown", mouseTracking, false);
 }
 
 function loadContentScript() {
-  let pbl = processBlocklist();
+  const pbl = processBlocklist();
   if (pbl.enable) {
     addListeners(pbl.domain);
   } else {
