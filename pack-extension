@@ -1,0 +1,3 @@
+#!/bin/ksh
+
+zip -r Auto-Copy.zip LICENSE manifest.json assets/* css/* html/* js/*

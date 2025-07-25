@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 //-----------------------------------------------------------------------------
 // Has info on how to auto-reload tabs
@@ -13,10 +13,10 @@
 let enableDebug = true;
 const debug = (...args) => {
   if (enableDebug) {
-    if (args[0] === 'Offscreen') {
+    if (args[0] === "Offscreen") {
       args[0] = `Auto-Copy (${args[0]})`;
     } else {
-      args.unshift('Auto-Copy (ServiceWorker):');
+      args.unshift("Auto-Copy (ServiceWorker):");
     }
     console.log.apply(null, args);
   }
@@ -37,24 +37,24 @@ const debug = (...args) => {
     //-------------------------------------------------------------------------
     // If we haven't received a tabId yet then let's just log to the console
     //-------------------------------------------------------------------------
-    let enableDebug = true;
+    const enableDebug = true;
     if (enableDebug) {
-      if (args[0] === 'Offscreen') {
+      if (args[0] === "Offscreen") {
         args[0] = `Auto-Copy (${args[0]})`;
       } else {
-        args.unshift('Auto-Copy (ServiceWorker):');
+        args.unshift("Auto-Copy (ServiceWorker):");
       }
       console.log.apply(null, args);
     }
     return;
   }
 
-  const target = (args[0] === 'Offscreen') ? args.shift() : 'ServiceWorker';
+  const target = (args[0] === "Offscreen") ? args.shift() : "ServiceWorker";
 
   chrome.tabs.sendMessage(tabId, {
-    'target' : target,
-    'type'   : 'log',
-    'data'   : args,
+    target: target,
+    type: "log",
+    data: args,
   });
 };
 
@@ -69,7 +69,7 @@ const debug = (...args) => {
 //-----------------------------------------------------------------------------
 chrome.runtime.onInstalled.addListener((...args) => {
   debug(`onInstalled listener`, args);
-  chrome.storage.sync.get('initializedStorage').then((obj) => {
+  chrome.storage.sync.get("initializedStorage").then((obj) => {
     debug(`is storage initialized? ${obj.initializedStorage}`, obj);
     if (!obj.initializedStorage) {
       //-----------------------------------------------------------------------
@@ -91,52 +91,48 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   //---------------------------------------------------------------------------
   /*
   chrome.tabs.sendMessage(sender.tab.id, {
-    'type': 'config', 'data' : opts
+    "type": "config", "data" : opts
   });
   */
 
   if (msg.type === "log") {
     debug(msg.target, ...msg.data);
   } else if (msg.type === "localStorageData") {
-    debug('Offscreen', ['Got config from localStorage', msg.data]);
+    debug("Offscreen", [ "Got config from localStorage", msg.data ]);
     convertConfigOrSetDefaults(msg.data);
   } else if (msg.type === "hideNotification") {
     tabId = sender.tab.id;
     debug(`${msg.type}`, msg);
     chrome.notifications.onClosed.dispatch();
-    chrome.notifications.getAll().then(obj => {
+    chrome.notifications.getAll().then((obj) => {
       if (Object.keys(obj).length !== 0) {
-        chrome.notifications.clear('AutoCopy');
+        chrome.notifications.clear("AutoCopy");
       }
     });
   } else if (msg.type === "showNotification") {
     tabId = sender.tab.id;
     debug(`${msg.type}`, msg);
-    chrome.notifications.getAll().then(obj => {
+    chrome.notifications.getAll().then((obj) => {
       if (Object.keys(obj).length !== 0) {
         debug(`In notification update`);
-        chrome.notifications.update(
-          'AutoCopy', {
-            'title'    : 'AutoCopy',
-            'message'  : msg.text,
-            'type'     : 'basic',
-            'iconUrl'  : '/assets/autoCopy-128.png',
-            'priority' : 1,
-            'silent'   : (msg.opts.nativeAlertOnCopySound) ? false : true,
-          },
-        );
+        chrome.notifications.update("AutoCopy", {
+          title: "AutoCopy",
+          message: msg.text,
+          type: "basic",
+          iconUrl: "/assets/autoCopy-128.png",
+          priority: 1,
+          silent: (msg.opts.nativeAlertOnCopySound) ? false : true,
+        });
       } else {
         debug(`In notification create`);
-        chrome.notifications.create(
-          'AutoCopy', {
-            'title'    : 'AutoCopy',
-            'message'  : msg.text,
-            'type'     : 'basic',
-            'iconUrl'  : '/assets/autoCopy-128.png',
-            'priority' : 1,
-            'silent'   : (msg.opts.nativeAlertOnCopySound) ? false : true,
-          },
-        );
+        chrome.notifications.create("AutoCopy", {
+          title: "AutoCopy",
+          message: msg.text,
+          type: "basic",
+          iconUrl: "/assets/autoCopy-128.png",
+          priority: 1,
+          silent: (msg.opts.nativeAlertOnCopySound) ? false : true,
+        });
       }
     });
   } else if (msg.type === "clearClipboard") {
@@ -145,7 +141,7 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     //-----------------------------------------------------------------------
     // Setting a null value will cause the clipboard to appear empty
     //-----------------------------------------------------------------------
-    offscreenCopyTextarea('\0');
+    offscreenCopyTextarea("\0");
   } else if (msg.type === "includeComment") {
     tabId = sender.tab.id;
     debug(`${msg.type}`, msg);
@@ -155,10 +151,10 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     debug(`${msg.type}`, msg);
     if (msg.text && msg.text.length > 0) {
       if (msg.opts.trimWhitesapce) {
-        msg.text = msg.text.replace(/^\s+|\s+$/g, '');
-        msg.text = msg.text.replace(/[\n\r]+$/g, '');
+        msg.text = msg.text.replace(/^\s+|\s+$/g, "");
+        msg.text = msg.text.replace(/[\n\r]+$/g, "");
       }
-      let comment =
+      const comment =
         `<a title="${msg.title}" href="${msg.href}">${msg.text}</a>`;
 
       offscreenCopyDiv(comment, msg.opts, msg.type);
@@ -168,8 +164,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     debug(`${msg.type}`, msg);
     if (msg.text && msg.text.length > 0) {
       if (msg.opts.trimWhitesapce) {
-        msg.text = req.text.replace(/^\s+|\s+$/g, '');
-        msg.text = req.text.replace(/[\n\r]+$/g, '');
+        msg.text = msg.text.replace(/^\s+|\s+$/g, "");
+        msg.text = msg.text.replace(/[\n\r]+$/g, "");
       }
       debug(`Reformat -- textArea value: '${msg.text}'`);
       offscreenCopyTextarea(msg.text);
@@ -180,49 +176,49 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 async function offscreenCopyTextarea(text) {
   debug("In offscreenCopyTextarea");
   await chrome.offscreen.createDocument({
-    url: chrome.runtime.getURL('/html/offscreen.html'),
-    reasons: [chrome.offscreen.Reason.CLIPBOARD],
-    justification: 'Modifying clipboard',
+    url: chrome.runtime.getURL("/html/offscreen.html"),
+    reasons: [ chrome.offscreen.Reason.CLIPBOARD ],
+    justification: "Modifying clipboard",
   });
   debug("After createDocument");
 
   chrome.runtime.sendMessage({
-    'type'   : 'copyTextarea',
-    'target' : 'offscreen-doc',
-    'text'   : text,
+    type: "copyTextarea",
+    target: "offscreen-doc",
+    text: text,
   });
 }
 
 async function offscreenCopyDiv(text, opts, subType) {
   debug("In offscreenCopyDiv");
   await chrome.offscreen.createDocument({
-    url: chrome.runtime.getURL('/html/offscreen.html'),
-    reasons: [chrome.offscreen.Reason.CLIPBOARD],
-    justification: 'Modifying clipboard',
+    url: chrome.runtime.getURL("/html/offscreen.html"),
+    reasons: [ chrome.offscreen.Reason.CLIPBOARD ],
+    justification: "Modifying clipboard",
   });
   debug("After createDocument");
 
   chrome.runtime.sendMessage({
-    'type'    : 'copyDiv',
-    'target'  : 'offscreen-doc',
-    'subType' : subType,
-    'text'    : text,
-    'opts'    : opts,
+    type: "copyDiv",
+    target: "offscreen-doc",
+    subType: subType,
+    text: text,
+    opts: opts,
   });
 }
 
 async function checkForLocalStorageConfig() {
   debug("In checkForLocalStorageConfig");
   await chrome.offscreen.createDocument({
-    url: chrome.runtime.getURL('/html/offscreen.html'),
-    reasons: [chrome.offscreen.Reason.LOCAL_STORAGE],
-    justification: 'Converting form localStorage to runtime.storage',
+    url: chrome.runtime.getURL("/html/offscreen.html"),
+    reasons: [ chrome.offscreen.Reason.LOCAL_STORAGE ],
+    justification: "Converting form localStorage to runtime.storage",
   });
   debug("After createDocument");
 
   chrome.runtime.sendMessage({
-    'type'   : 'retrieveLocalStorage',
-    'target' : 'offscreen-doc',
+    type: "retrieveLocalStorage",
+    target: "offscreen-doc",
   });
 }
 
@@ -232,102 +228,102 @@ function convertConfigOrSetDefaults(obj) {
   // the old and new name is the same.
   //---------------------------------------------------------------------------
   const configMap = {
-    'alertOnCopy'                   : 'alertOnCopy',
-    'alertOnCopySize'               : 'alertOnCopySize',
-    'alertOnCopyDuration'           : 'alertOnCopyDuration',
-    'alertOnCopyLocation'           : 'alertOnCopyLocation',
-    'removeSelectionOnCopy'         : 'removeSelectionOnCopy',
-    'enableForTextBoxes'            : 'enableForTextBoxes',
-    'enableForContentEditable'      : 'enableForContentEditable',
-    'pasteOnMiddleClick'            : 'pasteOnMiddleClick',
-    'ctrlToDisable'                 : 'ctrlToDisable',
-    'ctrlToDisableKey'              : 'ctrlToDisableKey',
-    'ctrlState'                     : 'ctrlState',
-    'altToCopyAsLink'               : 'altToCopyAsLink',
-    'altToCopyAsLinkModifier'       : 'altToCopyAsLinkModifier',
-    'copyAsLink'                    : 'copyAsLink',
-    'copyAsPlainText'               : 'copyAsPlainText',
-    'includeUrl'                    : 'includeComment',
-    'includeUrlToggle'              : 'includeCommentToggle',
-    'includeUrlToggleModifier'      : 'includeCommentToggleModifier',
-    'includeUrlToggleState'         : 'includeCommentToggleState',
-    'prependUrl'                    : 'includeCommentPrepend',
-    'includeUrlText'                : 'includeCommentFormat',
-    'includeUrlCommentCountEnabled' : 'includeCommentWordCountEnabled',
-    'includeUrlCommentCount'        : 'includeCommentWordCount',
-    'blockList'                     : 'blockList',
-    'debug'                         : 'enableDebug',
-    'copyDelay'                     : 'copyDelay',
-    'copyDelayWait'                 : 'copyDelayWait',
-    'clearClipboard'                : 'clearClipboard',
-    'clearClipboardWait'            : 'clearClipboardWait',
-    'trimWhitespace'                : 'trimWhitespace',
-    'nativeAlertOnCopy'             : 'nativeAlertOnCopy',
-    'nativeAlertOnCopySound'        : 'nativeAlertOnCopySound',
+    alertOnCopy: "alertOnCopy",
+    alertOnCopySize: "alertOnCopySize",
+    alertOnCopyDuration: "alertOnCopyDuration",
+    alertOnCopyLocation: "alertOnCopyLocation",
+    removeSelectionOnCopy: "removeSelectionOnCopy",
+    enableForTextBoxes: "enableForTextBoxes",
+    enableForContentEditable: "enableForContentEditable",
+    pasteOnMiddleClick: "pasteOnMiddleClick",
+    ctrlToDisable: "ctrlToDisable",
+    ctrlToDisableKey: "ctrlToDisableKey",
+    ctrlState: "ctrlState",
+    altToCopyAsLink: "altToCopyAsLink",
+    altToCopyAsLinkModifier: "altToCopyAsLinkModifier",
+    copyAsLink: "copyAsLink",
+    copyAsPlainText: "copyAsPlainText",
+    includeUrl: "includeComment",
+    includeUrlToggle: "includeCommentToggle",
+    includeUrlToggleModifier: "includeCommentToggleModifier",
+    includeUrlToggleState: "includeCommentToggleState",
+    prependUrl: "includeCommentPrepend",
+    includeUrlText: "includeCommentFormat",
+    includeUrlCommentCountEnabled: "includeCommentWordCountEnabled",
+    includeUrlCommentCount: "includeCommentWordCount",
+    blockList: "blockList",
+    debug: "enableDebug",
+    copyDelay: "copyDelay",
+    copyDelayWait: "copyDelayWait",
+    clearClipboard: "clearClipboard",
+    clearClipboardWait: "clearClipboardWait",
+    trimWhitespace: "trimWhitespace",
+    nativeAlertOnCopy: "nativeAlertOnCopy",
+    nativeAlertOnCopySound: "nativeAlertOnCopySound",
   };
-  let defaultOpts = {
-    'initializedStorage'             : true,
+  const defaultOpts = {
+    initializedStorage: true,
     // aoc
-    'alertOnCopy'                    : true,
+    alertOnCopy: true,
     // aocs
-    'alertOnCopySize'                : '14px',
+    alertOnCopySize: "14px",
     // aocd
-    'alertOnCopyDuration'            : .75,
-    'alertOnCopyLocation'            : 'BottomRight',
+    alertOnCopyDuration: .75,
+    alertOnCopyLocation: "BottomRight",
     // rsoc
-    'removeSelectionOnCopy'          : false,
+    removeSelectionOnCopy: false,
     // eitb
-    'enableForTextBoxes'             : true,
+    enableForTextBoxes: true,
     // eice
-    'enableForContentEditable'       : true,
+    enableForContentEditable: true,
     // pomc
-    'pasteOnMiddleClick'             : false,
+    pasteOnMiddleClick: false,
     // dc
-    'ctrlToDisable'                  : false,
+    ctrlToDisable: false,
     // dck
-    'ctrlToDisableKey'               : 'ctrl',
+    ctrlToDisableKey: "ctrl",
     // acs
-    'ctrlState'                      : 'disable',
+    ctrlState: "disable",
     // acal
-    'altToCopyAsLink'                : false,
+    altToCopyAsLink: false,
     // acalo
-    'altToCopyAsLinkModifier'        : 'alt',
+    altToCopyAsLinkModifier: "alt",
     // cal
-    'copyAsLink'                     : false,
+    copyAsLink: false,
     // capt
-    'copyAsPlainText'                : false,
+    copyAsPlainText: false,
     // iurl / includeUrl
-    'includeComment'                 : true,
+    includeComment: true,
     // iurlemod / includeUrlToggle
-    'includeCommentToggle'           : false,
+    includeCommentToggle: false,
     // iurlmod / includeUrlToggleModifier
-    'includeCommentToggleModifier'   : 'ctrlshift',
+    includeCommentToggleModifier: "ctrlshift",
     // iurlemodstate / includeUrlToggleState
-    'includeCommentToggleState'      : 'disable',
+    includeCommentToggleState: "disable",
     // prependUrl
-    'includeCommentPrepend'          : false,
+    includeCommentPrepend: false,
     // iurltext / includeUrlText
-    'includeCommentFormat'           :'$crlfCopied from: $title - <$url>',
+    includeCommentFormat: "$crlfCopied from: $title - <$url>",
     // iurlewc / includeUrlCommentCountEnabled
-    'includeCommentWordCountEnabled' : true,
+    includeCommentWordCountEnabled: true,
     // iurlcount / includeUrlCommentCount
-    'includeCommentWordCount'         : 5,
-    'blockList'                      : {},
+    includeCommentWordCount: 5,
+    blockList: {},
     // debug
-    'enableDebug'                    : false,
-    'copyDelay'                      : false,
-    'copyDelayWait'                  : 5,
-    'clearClipboard'                 : false,
-    'clearClipboardWait'             : 10,
-    'trimWhitespace'                 : false,
-    'nativeAlertOnCopy'              : false,
-    'nativeAlertOnCopySound'         : false,
+    enableDebug: false,
+    copyDelay: false,
+    copyDelayWait: 5,
+    clearClipboard: false,
+    clearClipboardWait: 10,
+    trimWhitespace: false,
+    nativeAlertOnCopy: false,
+    nativeAlertOnCopySound: false,
   };
 
   debug(`Opts (defaults):`, defaultOpts);
   debug(`localStorage opts:`, obj);
 
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     if (configMap[key]) {
       debug(`Setting ${configMap[key]} from ${key} with ${obj[key]}`);
       defaultOpts[configMap[key]] = obj[key];
@@ -337,9 +333,9 @@ function convertConfigOrSetDefaults(obj) {
   debug(`Combined opts:`, defaultOpts);
 
   //chrome.storage.local.set(defaultOpts).then(() => {
-  //  debug('local options initialized');
+  //  debug(`local options initialized`);
   //});
   chrome.storage.sync.set(defaultOpts).then(() => {
-    debug('sync options initialized');
+    debug(`sync options initialized`);
   });
 }
