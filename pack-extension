@@ -14,8 +14,12 @@ updateOptions($opts->{'v'}) if ($opts->{'u'});
 updateJSON('manifest.json', $opts->{'v'}) if ($opts->{'u'});
 updateJSON('package.json', $opts->{'v'}) if ($opts->{'u'});
 
-system("zip -r Auto-Copy.zip LICENSE manifest.json assets/* css/* html/* js/*")
-  if ($opts->{'z'});
+unlink('Auto-Copy.zip');
+system(
+  "cd .. && zip -r Auto-Copy/Auto-Copy.zip Auto-Copy/LICENSE " .
+  "Auto-Copy/manifest.json Auto-Copy/assets/* Auto-Copy/css/* " .
+  "Auto-Copy/html/* Auto-Copy/js/*"
+) if ($opts->{'z'});
 
 sub updateJSON {
   my $name = shift;
