@@ -28,7 +28,6 @@ export default defineConfig([
     },
     rules: {
       ...stylistic.configs.all.rules,
-      semi: "warn",
       "no-unused-vars": "warn",
       "prefer-const": "error",
       "no-var": "error",
