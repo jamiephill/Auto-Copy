@@ -1,0 +1,72 @@
+# Change Log
+- Version 5.0.0
+  - Updated for manifest v3
+  - Sync settings across browsers
+- Version 4.2.1
+  - Bug fix: extension did not work on localhost
+  - Bug fix: version number was wrong on the options page
+- Version 4.2.0
+  - Added clear clipboard
+  - Added trim whitespace
+  - Added native system notifications
+  - Added copy delay
+  - Renamed blacklist to blocklist
+- Version 4.1.7
+  - Added Privacy Policy
+  - Published as an Microsoft Edge Addon
+  - Allow for enable / disable of informational comment via a modifier key
+  - Enabled alert on copy by default
+  - Updated look and feel of options page
+  - bug fix: double clicking a selection would fail to copy after triple clicking
+  - bug fix: ‘Add the comment to the end of the copied text’ option failed to restore when options page was reloaded or relaunched
+  - bug fix: ‘Only include the comment if more than X words are selected’ would cause the selected text to appear twice in the clipboard
+  - bug fix: Enable / disable auto copy using a modifier key failed to work reliably
+- Version 4.1.6
+  - bug fixes
+- Version 4.1.5
+  - Added more comment formatting options for date/time information.
+  - Added support for debugging to console.
+- Version 4.1.4
+  - Allowed for alert on copy notice to be configurable.
+  - Eliminated delay on triple click.
+  - Bug fix: did not detect nested contentEditable elements.
+- Version 4.1.3
+  - Bug fix: auto copy notification text was unreadable on dark backgrounds.
+  - Bug fix: changes to click handling broke double click and drag; this capability has been restored.
+- Version 4.1.2
+  - Added support to disable in content editable elements.
+  - Added support to allow ctrl/shift to enable or disable the extension.
+  - Added to manifest so extension can work on any url type.
+  - Bug fix: auto copy would execute on text deselection, or clicking without selecting anything.
+  - Bug fix: stopped multiple copies when double or triple clicking.
+- Version 4.0.0
+  - Added support to disable with ctrl or shift key.
+  - Added support to copy as a link (always or using ALT key).
+  - Added support to remove selection after copy.
+  - Added support to notify on copy.
+  - Added support to blocklist URLs to disable the extension.
+  - Copy with comment and copy without formatting no longer rely on each other (requires Chrome v43 or later).
+  - Re-enabled support for copy with formatting (requires Chrome v43 or later).
+  - Updated paste on middle click handling.
+- Version 3.0.0
+  - Added support to blocklist websites to disable the extension.
+- Version 2.1.1
+  - Fixed a bug that prevented the extension from working if the options hadn’t ever been saved.
+- Version 2.1.0
+  - Added option to include the comment only if a minimum number of words are selected.
+- Version 2.0.0
+  - Added paste on middle click. Now requires Chrome 13 or higher which provides clipboard support in the extension API. Added ability to custom format the comment with macro expansion.
+- Version 1.0.6
+  - Update artwork to meet the requirements of the new Chrome Store.
+- Version 1.0.5
+  - Implemented a work-around for Chrome 6
+- Version 1.0.4
+  - Implemented fix for beeping sound that some users were experiencing. gregg submitted the patch to fix this issue. Thanks, gregg. The problem only occurred when the “Copy as plain text” option was enabled and a web page was clicked but no selection was made.
+- Version 1.0.3
+  - Updated the manifest description (12/11/2009)
+- Version 1.0.2
+  - Added two requested features. Copy as plain text (i.e. strip any formatting), and include the page URL with the copied text. (12/11/2009)
+- Version 1.0.1
+  - Bug fix — Selecting text in a text field when the text field option wasn’t enabled would result in copying the selection to the clipboard if the mouse cursor moved outside of the text field before the mouseup event occurred. (12/09/2009)
+- Version 1.0.0
+  - Initial release (12/08/2009)
