@@ -5,7 +5,8 @@ on:
     types: [opened, synchronize]
   push:
     branches:
-      - main # Optional: Also run on direct pushes to main
+      - '*' # Run on all branches
+      # - main # Optional: Also run on direct pushes to main
 
 jobs:
   eslint:
