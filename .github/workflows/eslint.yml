@@ -1,0 +1,27 @@
+name: ESLint Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main # Optional: Also run on direct pushes to main
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24' # Specify your Node.js version
+
+      - name: Install dependencies
+        run: npm install # Or npm ci if you use package-lock.json
+
+      - name: Run ESLint
+        run: npm run lint # Assuming you have a 'lint' script in your package.json
