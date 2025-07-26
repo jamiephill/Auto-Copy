@@ -69,7 +69,11 @@ const debug = (...args) => {
 //-----------------------------------------------------------------------------
 chrome.runtime.onInstalled.addListener((...args) => {
   debug(`onInstalled listener`, args);
-  chrome.storage.sync.get("initializedStorage").then((obj) => {
+  chrome.storage.sync.get([
+    "alertOnCopyLocation", // Temporary to fix issue with options conversion
+    "blockList",           // 7/26/25
+    "initializedStorage",
+  ]).then((obj) => {
     debug(`is storage initialized? ${obj.initializedStorage}`, obj);
     if (!obj.initializedStorage) {
       //-----------------------------------------------------------------------
@@ -81,6 +85,17 @@ chrome.runtime.onInstalled.addListener((...args) => {
       // with the info if it exists.
       //-----------------------------------------------------------------------
       checkForLocalStorageConfig();
+    } else {
+      const tObj = {};
+      if (obj.alertOnCopyLocation && obj.alertOnCopyLocation.match(/^[bt]/)) {
+        tObj.alertOnCopyLocation =
+          obj.alertOnCopyLocation.charAt(0).toUpperCase() +
+          obj.alertOnCopyLocation.slice(1);
+      }
+      if (obj.blockList && typeof obj.blockList === "string") {
+        tObj.blockList = convertBlockListToObject(obj.blockList);
+      }
+      chrome.storage.sync.set(tObj);
     }
   });
 });
@@ -222,6 +237,17 @@ async function checkForLocalStorageConfig() {
   });
 }
 
+function convertBlockListToObject(blockList) {
+  const tbl = {};
+  if (blockList.length > 0) {
+    blockList.split(",").forEach((k) => {
+      const parts = k.split(":");
+      tbl[parts[0]] = parseInt(parts[1], 10);
+    });
+  }
+  return (tbl);
+}
+
 function convertConfigOrSetDefaults(obj) {
   //---------------------------------------------------------------------------
   // Map expected items from localStorage to their new name.  Most of the time
@@ -308,7 +334,7 @@ function convertConfigOrSetDefaults(obj) {
     includeCommentWordCountEnabled: true,
     // iurlcount / includeUrlCommentCount
     includeCommentWordCount: 5,
-    blockList: {},
+    blockList: { "docs.google.com": 1 },
     // debug
     enableDebug: false,
     copyDelay: false,
@@ -326,7 +352,14 @@ function convertConfigOrSetDefaults(obj) {
   Object.keys(obj).forEach((key) => {
     if (configMap[key]) {
       debug(`Setting ${configMap[key]} from ${key} with ${obj[key]}`);
-      defaultOpts[configMap[key]] = obj[key];
+      if (key === "alertOnCopyLocation") {
+        defaultOpts[configMap[key]] =
+          obj[key].charAt(0).toUpperCase() + obj[key].slice(1);
+      } else if (key === "blockList") {
+        defaultOpts[configMap[key]] = convertBlockListToObject(obj[key]);
+      } else {
+        defaultOpts[configMap[key]] = obj[key];
+      }
     }
   });
 

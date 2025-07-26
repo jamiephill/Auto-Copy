@@ -1,4 +1,6 @@
 # Change Log
+- Version 5.0.1
+  - Fixed issues with conversion of options from manifest v2 to v3
 - Version 5.0.0
   - Updated for manifest v3
   - Sync settings across browsers
