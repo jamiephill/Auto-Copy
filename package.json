@@ -1,6 +1,6 @@
 {
   "name": "Auto Copy",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Auto Copy is an extension for [Chrome](https://www.google.com/chrome/) and [Edge web](https://www.microsoft.com/en-us/edge) browsers. It will automatically copy any selected text to the clipboard.",
   "main": "js/autoCopy.js",
   "scripts": {
