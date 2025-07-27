@@ -423,7 +423,7 @@ function sendMessage(obj) {
     el.style.backgroundColor = "#FFFF5C";
     el.style.position = "fixed";
     el.style.borderRadius = ".25em";
-    el.innerHTML = `Auto-copy has been updated.  The page needs ` +
+    el.innerHTML = `Auto Copy extension has been updated.  The page needs ` +
       `to be <a style="text-decoration: underline; color: #0000EE; cursor: ` +
       `pointer" onclick="location.reload()">reloaded</a> in order for it to ` +
       `work. <a onclick="document.body.removeChild(document.getElementById( ` +
@@ -439,6 +439,10 @@ function sendMessage(obj) {
     el1.style.display = "flex";
     el1.style["justify-content"] = "center";
     el1.style["align-items"] = "center";
+    el1.style.border = "none";
+    el1.style.background = "transparent";
+    el1.style.width = "100%";
+    el1.style.height = "0";
 
     document.body.appendChild(el1);
   }
