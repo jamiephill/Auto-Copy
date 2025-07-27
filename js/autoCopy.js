@@ -394,7 +394,9 @@ const copyAsPlainText = ((params) => {
 function sendMessage(obj) {
   debug(`In sendMessage`);
   try {
-    chrome.runtime.sendMessage(obj);
+    chrome.runtime.sendMessage(obj, () => {
+      alertOnCopy();
+    });
   } catch (ex) {
     debug(`Caught exception: `, ex);
     //-------------------------------------------------------------------------
@@ -751,7 +753,6 @@ const autoCopy = ((e) => {
         opts.copyAsPlainText = false;
       }
     }
-    alertOnCopy(e);
   } catch (ex) {
     debug(`Caught exception: `, ex);
   }
