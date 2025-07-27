@@ -186,6 +186,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
       offscreenCopyTextarea(msg.text);
     }
   }
+
+  return (true);
 });
 
 async function offscreenCopyTextarea(text) {

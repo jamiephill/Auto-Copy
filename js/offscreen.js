@@ -99,4 +99,6 @@ chrome.runtime.onMessage.addListener(async (msg) => {
   }
 
   window.close();
+
+  return (true);
 });
