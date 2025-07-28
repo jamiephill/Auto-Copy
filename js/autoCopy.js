@@ -395,6 +395,7 @@ function sendMessage(obj) {
   debug(`In sendMessage`);
   try {
     chrome.runtime.sendMessage(obj);
+    alertOnCopy();
   } catch (ex) {
     debug(`Caught exception: `, ex);
     //-------------------------------------------------------------------------
@@ -749,9 +750,10 @@ const autoCopy = ((e) => {
         opts.copyAsPlainText = true;
         copyAsPlainText({ event: e });
         opts.copyAsPlainText = false;
+      } else {
+        alertOnCopy();
       }
     }
-    alertOnCopy(e);
   } catch (ex) {
     debug(`Caught exception: `, ex);
   }

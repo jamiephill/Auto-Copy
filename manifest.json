@@ -1,7 +1,7 @@
 {
   "name"                    : "Auto Copy",
   "description"             : "Automatically copy selected text to the clipboard. Has many configurable options for controlling the behavior.",
-  "version"                 : "5.0.1",
+  "version"                 : "5.0.2",
   "icons"                   : {
     "128" : "assets/autoCopy-128.png"
   },
@@ -28,7 +28,7 @@
     "matches"    : ["<all_urls>"],
     "css"        : [],
     "js"         : ["js/autoCopy.js"],
-    "run_at"     : "document_end",
+    "run_at"     : "document_start",
     "all_frames" : true
   }]
 }

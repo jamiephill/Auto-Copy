@@ -18,7 +18,7 @@ unlink('Auto-Copy.zip');
 system(
   "cd .. && zip -r Auto-Copy/Auto-Copy.zip Auto-Copy/LICENSE " .
   "Auto-Copy/manifest.json Auto-Copy/assets/* Auto-Copy/css/* " .
-  "Auto-Copy/html/* Auto-Copy/js/*"
+  "Auto-Copy/html/* Auto-Copy/js/*.js"
 ) if ($opts->{'z'});
 
 sub updateJSON {
