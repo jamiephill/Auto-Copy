@@ -298,6 +298,12 @@ function convertConfigOrSetDefaults(obj) {
     alertOnCopyLocation: "BottomRight",
     // rsoc
     removeSelectionOnCopy: false,
+    enableSelectAll: true,
+    enableSelectAllForTextBoxes: true,
+    enableSelectAllForContentEditable: true,
+    enableArrowSelect: true,
+    enableArrowSelectForTextBoxes: true,
+    enableArrowSelectForContentEditable: true,
     // eitb
     enableForTextBoxes: true,
     // eice

@@ -4,6 +4,10 @@ const opts = {
   mouseDownTarget: null,
   mouseStartX: 0,
   mouseStartY: 0,
+  keyboard: {
+    selectAll: false,
+    arrowSelect: false,
+  },
   timerId: {
     tripleClick: 0,
     autoCopyDelay: 0,
@@ -464,14 +468,42 @@ function sendMessage(obj) {
 const autoCopyDecideAction = ((e) => {
   let mouseTravel = false;
 
-  debug(
-    `Mouse coords: X(end)=${e.x} - Y(end)=${e.y} -`,
-    `X(start)=${opts.mouseStartX} - Y(start)=${opts.mouseStartY}`
-  );
-  debug(
-    `Keyboard modifiers: ALT=${e.altKey}; CTRL=${e.ctrlKey};`,
-    `SHIFT=${e.shiftKey}`
-  );
+  if (e.type === "keyup") {
+    //------------------------------------------------------------------------
+    // Some sites like Jira are preventing propagation of the keydown event
+    // So the keyboard tracking isn't working in that case.  However, we can
+    // also detect the appropriate keyboard thing here.
+    //
+    // It can be finicky for ctrl-a as you have to have ctrl press when the
+    // a key is release otherwise we can't detect it here.
+    //------------------------------------------------------------------------
+    if (e.ctrlKey && e.key === "a" || e.metaKey && e.key === "a") {
+      opts.keyboard.selectAll = true;
+    } else if (e.shiftKey && e.key.match(/^Arrow\w+/)) {
+      opts.keyboard.arrowSelect = true;
+    }
+    debug(
+      `got a keyup event: selectAll? ${opts.keyboard.selectAll};`,
+      `arrowSelect? ${opts.keyboard.arrowSelect}`,
+      e
+    );
+    if (
+      opts.keyboard.selectAll ||
+      (opts.keyboard.arrowSelect && e.key === "Shift")
+    ) {
+      autoCopyDelay(e);
+      return;
+    }
+  } else if (e.type === "mouseup") {
+    debug(
+      `Mouse coords: X(end)=${e.x} - Y(end)=${e.y} -`,
+      `X(start)=${opts.mouseStartX} - Y(start)=${opts.mouseStartY}`
+    );
+    debug(
+      `Keyboard modifiers: ALT=${e.altKey}; CTRL=${e.ctrlKey};`,
+      `SHIFT=${e.shiftKey}`
+    );
+  }
 
   if (opts.mouseStartX && opts.mouseStartY) {
     const x = Math.abs(e.x - opts.mouseStartX);
@@ -581,7 +613,6 @@ const modifierKeyActive = ((e, name) => {
 // pages.
 //-----------------------------------------------------------------------------
 const autoCopy = ((e) => {
-  //let nodeTypes = { "input" : false, "editable" : false };
   let inputElement = false;
   let editableElement = false;
 
@@ -591,19 +622,24 @@ const autoCopy = ((e) => {
     (opts.mouseDownTarget.nodeName === "INPUT" ||
       opts.mouseDownTarget.nodeName === "TEXTAREA")
   ) {
-    debug(`Mouse down on input element`);
+    debug(`Focus is on an input element`);
     inputElement = true;
   }
 
   if (opts.mouseDownTarget && opts.mouseDownTarget.isContentEditable) {
-    debug(`Mouse down on content editable element`);
+    debug(`Focus is on a content editable element`);
     editableElement = true;
   }
 
   debug(`opts: `, opts);
+  debug(`input element? ${inputElement}; content editable? ${editableElement}`);
   debug(
     `Use modifier to ${opts.ctrlState} extension? ${opts.ctrlToDisable};`,
     `modifier key: ${opts.ctrlToDisableKey}`
+  );
+  debug(
+    `keyboard selectAll? ${opts.keyboard.selectAll}; arrowSelection:`,
+    `${opts.keyboard.arrowSelect}`
   );
 
   if (opts.ctrlToDisable) {
@@ -626,7 +662,7 @@ const autoCopy = ((e) => {
       flag = true;
     }
 
-    if (!flag) {
+    if (!flag && !opts.keyboard.selectAll) {
       debug(`Ignoring copy due to modifier and state`);
       return;
     }
@@ -669,16 +705,27 @@ const autoCopy = ((e) => {
     `selection collapsed? ${s.isCollapsed}; length: ${text.length};`,
     `selection: ${text}`
   );
-  if (!inputElement && s.isCollapsed) {
-    debug(`No selection, ignoring click`);
+  if ((opts.keyboard.selectAll || opts.keyboard.arrowSelect) && text.length) {
+    // JIRA selecting title with ctrl-a isn't working so I add this to get
+    // around it.  Need to understand what selection collapsed actually means
+    debug(`keyboard.selectAll and selection has length`);
+  } else if (!inputElement && s.isCollapsed) {
+    debug(`No selection, ignoring click/keyboard`);
+    opts.keyboard.selectAll = false;
+    opts.keyboard.arrowSelect = false;
     return;
   } else if (inputElement && text.length <= 0) {
     //-------------------------------------------------------------------------
     // Chrome is showing collapsed when an input element has selected text.
     //-------------------------------------------------------------------------
     debug(`(input element) No selection, ignoring click`);
+    opts.keyboard.selectAll = false;
+    opts.keyboard.arrowSelect = false;
     return;
   }
+
+  opts.keyboard.selectAll = false;
+  opts.keyboard.arrowSelect = false;
 
   try {
     debug(
@@ -783,6 +830,22 @@ const autoCopy = ((e) => {
   return;
 });
 
+const keyboardTracking = ((e) => {
+  debug(`In keyboardTracking: shiftKey? ${e.shiftKey}; key=${e.key}`, e);
+  if (e.ctrlKey && e.key === "a") {
+    debug(`Ctrl-a pressed`);
+    opts.keyboard.selectAll = true;
+  } else if (e.metaKey && e.key === "a") {
+    debug(`Meta-a pressed`);
+    opts.keyboard.selectAll = true;
+  } else if (e.shiftKey && e.key.match(/^Arrow\w+/)) {
+    if (!opts.keyboard.arrowSelect) {
+      debug(`Arrow selection active`);
+    }
+    opts.keyboard.arrowSelect = true;
+  }
+});
+
 const mouseTracking = ((e) => {
   debug(`Setting mouse start: X(start)=${e.x}; Y(start)=${e.y}`);
   opts.mouseStartX = e.x;
@@ -870,6 +933,8 @@ function addListeners(domain) {
   opts.blockListSiteEnabled = true;
   document.addEventListener("mouseup", autoCopyDecideAction, false);
   document.addEventListener("mousedown", mouseTracking, false);
+  document.addEventListener("keyup", autoCopyDecideAction, false);
+  document.addEventListener("keydown", keyboardTracking, false);
 }
 
 function removeListeners(domain) {
@@ -877,6 +942,8 @@ function removeListeners(domain) {
   opts.blockListSiteEnabled = false;
   document.removeEventListener("mouseup", autoCopyDecideAction, false);
   document.removeEventListener("mousedown", mouseTracking, false);
+  document.removeEventListener("keyup", autoCopyDecideAction, false);
+  document.removeEventListener("keydown", keyboardTracking, false);
 }
 
 function loadContentScript() {
