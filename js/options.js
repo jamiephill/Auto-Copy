@@ -130,6 +130,8 @@ function restoreOptions() {
   showHideDiv(opts.includeComment, "includeCommentSettings");
   showHideDiv(opts.copyDelay, "copyDelaySettings");
   showHideDiv(opts.clearClipboard, "clearClipboardSettings");
+  showHideDiv(opts.enableSelectAll, "enableSelectAllSettings");
+  showHideDiv(opts.enableArrowSelect, "enableArrowSelectSettings");
 
   disableModifier();
   handleExclusivity();
@@ -137,24 +139,24 @@ function restoreOptions() {
 
 function disableModifier() {
   const els = {};
-  document.querySelectorAll(".modifierKey").forEach((item) => {
-    els[item.options[item.selectedIndex].value] = item;
-    [ ].forEach.call(item.options, (option) => {
-      option.removeAttribute("disabled");
+  document.querySelectorAll(".modifierKey").forEach((el) => {
+    els[el.value] = el;
+    [ ...el.options ].forEach((optionEl) => {
+      optionEl.removeAttribute("disabled");
     });
   });
 
-  for (const [ k, v ] of Object.entries(els)) {
-    document.querySelectorAll(".modifierKey").forEach((item) => {
-      if (v.id === item.id) {
-        return;
+  Object.keys(els).forEach((key) => {
+    document.querySelectorAll(".modifierKey").forEach((el) => {
+      if (els[key].value === el.value) {
+        return true;
       }
-      const option = item.options.namedItem(k);
+      const option = el.options.namedItem(key);
       if (option) {
         option.setAttribute("disabled", "");
       }
     });
-  }
+  });
 }
 
 function initBlockListDiv() {
@@ -342,6 +344,74 @@ function handleExclusivity() {
 
 document.addEventListener("DOMContentLoaded", function () {
   showLoading();
+  const createModifierOptions = (() => {
+    const optionsData = [{
+      value: "ctrl",
+      text: "Ctrl",
+    },
+    {
+      value: "alt",
+      text: "Alt",
+    },
+    {
+      value: "shift",
+      text: "Shift",
+    },
+    {
+      value: "meta",
+      text: "Meta (&#8862; / &#8984; / G)",
+    },
+    {
+      value: "ctrlalt",
+      text: "Ctrl-Alt",
+    },
+    {
+      value: "ctrlshift",
+      text: "Ctrl-Shift",
+    },
+    {
+      value: "ctrlmeta",
+      text: "Ctrl-Meta",
+    },
+    {
+      value: "altshift",
+      text: "Alt-Shift",
+    },
+    {
+      value: "altmeta",
+      text: "Alt-Meta",
+    },
+    {
+      value: "shiftmeta",
+      text: "Shift-Meta",
+    },
+    {
+      value: "ctrlaltshift",
+      text: "Ctrl-Alt-Shift",
+    },
+    {
+      value: "ctrlaltmeta",
+      text: "Ctrl-Alt-Meta",
+    },
+    {
+      value: "ctrlshiftmeta",
+      text: "Ctrl-Shift-Meta",
+    },
+    {
+      value: "altshiftmeta",
+      text: "Alt-Shift-Meta",
+    }];
+    document.querySelectorAll(".modifierKey").forEach((el) => {
+      optionsData.forEach((data) => {
+        const opt = document.createElement("option");
+        opt.value = data.value;
+        opt.setAttribute("name", data.value);
+        opt.innerHTML = data.text;
+        el.appendChild(opt);
+      });
+    });
+  });
+  createModifierOptions();
 
   const validateNumberValue = (id, defVal) => {
     const el = document.getElementById(id);
@@ -428,7 +498,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addToBlockList
   );
   document.getElementById("domaintext").addEventListener("keyup", (e) => {
-    if (e.keyCode === 13) {
+    if (e.key === "Enter") {
       addToBlockList();
     }
   });

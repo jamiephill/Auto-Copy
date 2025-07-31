@@ -12,6 +12,8 @@
 #/build
 
 # misc
+*~
+.*.swp
 .DS_Store
 !.env.example
 .env

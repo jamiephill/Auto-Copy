@@ -107,6 +107,21 @@ body {
   color: #444;
 }
 
+span.arrowKeys {
+  position: relative;
+  top: 4px;
+}
+
+span.arrowKeys img {
+  width: 24px;
+  transition: transform 0.3s ease-in-out;
+  transform-origin: left;
+}
+
+span.arrowKeys img:hover {
+  transform: scale(3);
+}
+
 div#clearClipboardSettings,
 div#copyDelaySettings,
 div#nativeAlertOnCopySettings,
