@@ -12,6 +12,7 @@ const opts = {
   },
   blockListSiteEnabled: false,
   blockList: {},
+  //disableAutoCopy: false,
   //enableDebug: false,
 };
 
@@ -398,6 +399,7 @@ function sendMessage(obj) {
     alertOnCopy();
   } catch (ex) {
     debug(`Caught exception: `, ex);
+    /* Removing until I can get this working better
     //-------------------------------------------------------------------------
     // If we detect a fault here then the extension has likely been updated so
     // let's notify the user that the page needs to be reload.
@@ -446,6 +448,7 @@ function sendMessage(obj) {
     el1.style.height = "0";
 
     document.body.appendChild(el1);
+    */
   }
 }
 
