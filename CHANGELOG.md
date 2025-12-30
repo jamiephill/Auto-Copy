@@ -1,4 +1,6 @@
 # Change Log
+- Version 5.0.5
+  - BUG Fix: Browser crash / High CPU utilization when using native alert on copy
 - Version 5.0.4
   - Added meta key as a modifier key option
 - Version 5.0.3
