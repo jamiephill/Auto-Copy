@@ -1,7 +1,7 @@
 {
   "name"                    : "Auto Copy",
   "description"             : "Automatically copy selected text to the clipboard. Has many configurable options for controlling the behavior.",
-  "version"                 : "5.0.3",
+  "version"                 : "5.0.4",
   "icons"                   : {
     "128" : "assets/autoCopy-128.png"
   },

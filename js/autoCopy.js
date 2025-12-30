@@ -473,7 +473,7 @@ const autoCopyDecideAction = ((e) => {
   );
   debug(
     `Keyboard modifiers: ALT=${e.altKey}; CTRL=${e.ctrlKey};`,
-    `SHIFT=${e.shiftKey}`
+    `SHIFT=${e.shiftKey}; META=${e.metaKey}`
   );
 
   if (opts.mouseStartX && opts.mouseStartY) {
@@ -549,19 +549,59 @@ const autoCopyDelay = ((e) => {
 });
 
 const modifierKeyActive = ((e, name) => {
-  if (name === "ctrl" && e.ctrlKey && !e.shiftKey && !e.altKey) {
-    return true;
-  } else if (name === "alt" && e.altKey && !e.ctrlKey && !e.shiftKey) {
-    return true;
-  } else if (name === "shift" && e.shiftKey && !e.ctrlKey && !e.altKey) {
-    return true;
-  } else if (name === "ctrlalt" && e.ctrlKey && e.altKey && !e.shiftKey) {
-    return true;
-  } else if (name === "ctrlshift" && e.ctrlKey && e.shiftKey && !e.altKey) {
-    return true;
-  } else if (name === "ctrlaltshift" && e.ctrlKey && e.shiftKey && e.altKey) {
-    return true;
-  } else if (name === "altshift" && e.altKey && e.shiftKey && !e.ctrlKey) {
+  const modKeys = {};
+  [ "ctrl", "alt", "shift", "meta" ].forEach((key) => {
+    modKeys[key] = {
+      active: e[key + "Key"],
+      check: (name.match(`${key}`)) ? true : false,
+    };
+  });
+  const count = {
+    //-------------------------------------------------------------------------
+    // Count of modifier keys that should be active
+    //-------------------------------------------------------------------------
+    key: 0,
+    //-------------------------------------------------------------------------
+    // Count of modifier keys that are active
+    //-------------------------------------------------------------------------
+    activeKey: 0,
+    //-------------------------------------------------------------------------
+    // Count of modifier keys that are active and should be active
+    //-------------------------------------------------------------------------
+    activeValidKey: 0,
+    //-------------------------------------------------------------------------
+    // All three of these should be equal in order for modifier keys to be in
+    // effect
+    //-------------------------------------------------------------------------
+  };
+
+  //---------------------------------------------------------------------------
+  // We only want modifiers keys to be considered valid if the exact
+  // combination is sent.  For instance ctrl-meta would not be valid if
+  // ctrl-shift-meta were in effect.
+  //---------------------------------------------------------------------------
+  Object.keys(modKeys).forEach((key) => {
+    if (modKeys[key].check) {
+      count.key++;
+    }
+    if (modKeys[key].active) {
+      count.activeKey++;
+    }
+    if (modKeys[key].check && modKeys[key].active) {
+      count.activeValidKey++;
+    }
+  });
+
+  debug(
+    `Modifier key check: modifier key count: ${count.key} / active`,
+    `key count: ${count.activeKey} / active valid key count:`,
+    `${count.activeValidKey})`,
+    modKeys
+  );
+
+  if (
+    count.key === count.activeKey && count.activeKey === count.activeValidKey
+  ) {
     return true;
   }
 
@@ -605,7 +645,7 @@ const autoCopy = ((e) => {
 
   debug(`opts: `, opts);
   debug(
-    `Use modifier to ${opts.ctrlState} extension? ${opts.ctrlToDisable};`,
+    `Use modifier to '${opts.ctrlState}' extension? ${opts.ctrlToDisable};`,
     `modifier key: ${opts.ctrlToDisableKey}`
   );
 
