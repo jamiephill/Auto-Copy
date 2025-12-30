@@ -1,4 +1,11 @@
 # Change Log
+- Version 5.0.4
+  - Added meta key as a modifier key option
+- Version 5.0.3
+  - Reinstated Paste On Middle Click
+  - Removed reload notification on extension update
+- Version 5.0.2
+  - Bug fix for copy without formatting and copy as a link working intermittently
 - Version 5.0.1
   - Fixed issues with conversion of options from manifest v2 to v3
 - Version 5.0.0
