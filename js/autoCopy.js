@@ -101,7 +101,6 @@ const fade = ((el, speed) => {
   );
 });
 
-/*const alertOnCopy = ((e) => {*/
 const alertOnCopy = (() => {
   if (opts.disableAutoCopy) {
     return;
@@ -393,10 +392,9 @@ const copyAsPlainText = ((params) => {
 });
 
 function sendMessage(obj) {
-  debug(`In sendMessage`);
+  debug(`In sendMessage (${obj.type})`, obj);
   try {
     chrome.runtime.sendMessage(obj);
-    alertOnCopy();
   } catch (ex) {
     debug(`Caught exception: `, ex);
     /* Removing until I can get this working better
@@ -793,13 +791,13 @@ const autoCopy = ((e) => {
         opts.copyAsPlainText = true;
         copyAsPlainText({ event: e });
         opts.copyAsPlainText = false;
-      } else {
-        alertOnCopy();
       }
     }
   } catch (ex) {
     debug(`Caught exception: `, ex);
   }
+
+  alertOnCopy();
 
   if (opts.removeSelectionOnCopy) {
     debug(`Removing selection`);
